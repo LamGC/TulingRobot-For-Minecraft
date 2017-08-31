@@ -141,7 +141,8 @@ public class PluginMain extends JavaPlugin implements Listener {
      * @throws UnsupportedEncodingException 编码不支持转换异常
      */
     private String e2e(String m) throws UnsupportedEncodingException {
-        return new String(m.getBytes(),System.getProperty("file.encoding"));
+        //return new String(m.getBytes(),System.getProperty("file.encoding"));
+        return new String(m.getBytes(),"GBK");
     }
 
     /**
