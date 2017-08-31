@@ -1,0 +1,14 @@
+Manifest-Version: 1.0
+Class-Path: gson-2.8.1.jar bukkit-1.6.4-R2.0.jar bukkit-1.8-R0.1-SNAPS
+ HOT-latest.jar bukkit-1.9-R0.1-SNAPSHOT-latest.jar bukkit-1.10-R0.1-S
+ NAPSHOT-latest.jar bukkit-1.8.3-R0.1-SNAPSHOT-latest.jar bukkit-1.8.4
+ -R0.1-SNAPSHOT-latest.jar bukkit-1.8.5-R0.1-SNAPSHOT-latest.jar bukki
+ t-1.8.6-R0.1-SNAPSHOT-latest.jar bukkit-1.8.7-R0.1-SNAPSHOT-latest.ja
+ r bukkit-1.8.8-R0.1-SNAPSHOT-latest.jar bukkit-1.9.2-R0.1-SNAPSHOT-la
+ test.jar bukkit-1.9.4-R0.1-SNAPSHOT-latest.jar bukkit-1.10.2-R0.1-SNA
+ PSHOT-latest.jar bukkit-1.5.2-R0.2-20130507.060121-3.jar bukkit-1.7.2
+ -R0.4-20140216.011848-2.jar bukkit-1.7.5-R0.1-20140329.215701-4.jar b
+ ukkit-1.7.9-R0.1-20140501.232652-9.jar bukkit-1.7.10-R0.1-20140808.00
+ 5150-4.jar
+Main-Class: net.coding.lamgc.TulingRobot.PluginMain
+

@@ -1,0 +1,10 @@
+name: TulingRobot
+main: net.coding.lamgc.TulingRobot.PluginMain
+version: 1.0.0
+author: LamGC
+commands:
+     robot:
+          description: 与机器人聊天233
+          usage: /robot [Message(消息)]
+          permission: TulingRobot.Robot
+          permission-message: 嘿！你还没有与机器人聊天的权限呢！快向OP申请获得权限吧！

@@ -51,7 +51,6 @@ public class PluginMain extends JavaPlugin implements Listener {
     private void LoadApiKey() {
         try {
             File KeyFile = new File(getDataFolder().getPath() + "/ApiKey.txt");
-            getLogger().info("ApiKey文件路径:" + KeyFile.getAbsolutePath());
             if (KeyFile.exists()) {
                 if (KeyFile.isFile()) {
                     if (KeyFile.length() == 0L) {
@@ -63,6 +62,7 @@ public class PluginMain extends JavaPlugin implements Listener {
                             "UTF-8");//考虑到编码格式
                     BufferedReader bufferedReader = new BufferedReader(read);
                     TLR.SetApiKey(bufferedReader.readLine());
+                    getLogger().info("已成功读取ApiKey");
                 } else {
                     getLogger().warning("ApiKey不是一个合法的文件！");
                 }
