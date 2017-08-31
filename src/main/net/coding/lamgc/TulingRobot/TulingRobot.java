@@ -59,7 +59,6 @@ public class TulingRobot {
         sj.addProperty("userid",UserID);
         //String re = HttpRequest.sendGet(getApiUrl(true),"key=" + ApiKey + "&info=" + URLEncoder.encode(msg,"UTF-8") + "&userid=" + URLEncoder.encode(UserID,"UTF-8"));
         String re = HttpRequest.sendPost(getApiUrl(true),new String(sj.toString().getBytes("UTF-8")),"application/json");
-        re = new String(re.getBytes(),System.getProperty("file.encoding"));
         return new JsonParser().parse(re).getAsJsonObject();
     }
 
