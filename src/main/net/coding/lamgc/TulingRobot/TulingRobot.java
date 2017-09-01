@@ -1,3 +1,19 @@
+/**
+ This file is part of TulingRobot_For_Minecraft.
+
+ TulingRobot_For_Minecraft is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ TulingRobot_For_Minecraft is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package net.coding.lamgc.TulingRobot;
 
 import com.google.gson.JsonObject;
@@ -8,6 +24,7 @@ import java.io.UnsupportedEncodingException;
 
 /**
  * 图灵机器人Api
+ * @author LamGC
  */
 public class TulingRobot {
 
