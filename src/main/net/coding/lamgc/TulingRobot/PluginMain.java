@@ -115,7 +115,6 @@ public class PluginMain extends JavaPlugin implements Listener {
 
     /**
      * 命令处理方法
-     *
      * @param sender 发送者，可强转为 [Player] 类型
      * @param cmd    命令首
      * @param label  命令缩写
@@ -150,6 +149,7 @@ public class PluginMain extends JavaPlugin implements Listener {
 
     /**
      * 玩家聊天监听事件
+     * 暂时留着，到时候再说233
      * @param event 事件参数
      */
     @EventHandler(priority = EventPriority.LOWEST)

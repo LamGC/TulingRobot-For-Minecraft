@@ -99,10 +99,6 @@ public class TulingRobot {
         }
     }
 
-    public TLCode getCode(){
-        return new TLCode();
-    }
-
     /**
      * 返回信息的Code
      */

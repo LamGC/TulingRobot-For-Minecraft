@@ -6,13 +6,11 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
 
 /**
  * 本类代码来源
  * http://www.cnblogs.com/zhuawang/archive/2012/12/08/2809380.html
+ * 代码经过修改，详细请查看历史修改
  */
 public class HttpRequest {
     /**
@@ -129,7 +127,6 @@ public class HttpRequest {
                 ex.printStackTrace();
             }
         }
-        System.out.println(Arrays.toString(result.getBytes()));
         return result;
     }
 }
