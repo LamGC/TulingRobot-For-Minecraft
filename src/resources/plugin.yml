@@ -1,6 +1,6 @@
 name: TulingRobot
 main: net.coding.lamgc.TulingRobot.PluginMain
-version: 1.0.0
+version: 1.1.0
 author: LamGC
 commands:
      robot:
