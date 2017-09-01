@@ -133,36 +133,19 @@ public class PluginMain extends JavaPlugin implements Listener {
             }
             assert rem != null;
             int code = rem.get("code").getAsInt();
-            try {
-                if (code == TulingRobot.TLCode.Text) {
-
-                    sender.sendMessage(e2e(rem.get("text").getAsString()));
-                } else if (code == TulingRobot.TLCode.Url) {
-                    sender.sendMessage(e2e(rem.get("text") + "(Url:" + rem.get("url") + ")"));
-                } else if (code >= TulingRobot.TLCode.News && code <= TulingRobot.TLCode.children_Poetry) {
-                    sender.sendMessage("[插件]本功能咱不支持");
-                } else if (code >= TulingRobot.TLCode.Error_KeyError) {
-                    sender.sendMessage("[错误]" + TLR.getErrorString(code) + "(" + code + ")");
-                    getLogger().warning("[错误]" + TLR.getErrorString(code) + "(" + code + ")");
-                }
-            }catch(UnsupportedEncodingException e){
-                getLogger().warning("发生一个异常 编码不支持转换！");
-                e.printStackTrace();
+            if (code == TulingRobot.TLCode.Text) {
+                sender.sendMessage(rem.get("text").getAsString());
+            } else if (code == TulingRobot.TLCode.Url) {
+                sender.sendMessage(rem.get("text") + "(Url:" + rem.get("url") + ")");
+            } else if (code >= TulingRobot.TLCode.News && code <= TulingRobot.TLCode.children_Poetry) {
+                sender.sendMessage("[插件]本功能咱不支持");
+            } else if (code >= TulingRobot.TLCode.Error_KeyError) {
+                sender.sendMessage("[错误]" + TLR.getErrorString(code) + "(" + code + ")");
+                getLogger().warning("[错误]" + TLR.getErrorString(code) + "(" + code + ")");
             }
             return true;
         }
         return false;
-    }
-
-    /**
-     * 将文本转为当前系统字符编码
-     * @param m 原文本
-     * @return 转换后文本
-     * @throws UnsupportedEncodingException 编码不支持转换异常
-     */
-    private String e2e(String m) throws UnsupportedEncodingException {
-        //return new String(m.getBytes(),System.getProperty("file.encoding"));
-        return new String(m.getBytes(),"GBK");
     }
 
     /**
