@@ -70,23 +70,33 @@ public class PluginMain extends JavaPlugin implements Listener {
      */
     private void LoadApiKey() {
         try {
+            //获取文件File对象
             File KeyFile = new File(getDataFolder().getPath() + "/ApiKey.txt");
+            //检查文件是否存在
             if (KeyFile.exists()) {
+                //检查是否为一个文件
                 if (KeyFile.isFile()) {
+                    //确定文件是否为空
                     if (KeyFile.length() == 0L) {
                         getLogger().warning("ApiKey文件为空，请填入ApiKey！");
                         return;
                     }
+                    //开始读取
                     InputStreamReader read = new InputStreamReader(
                             new FileInputStream(KeyFile),
                             "UTF-8");//考虑到编码格式
                     BufferedReader bufferedReader = new BufferedReader(read);
+                    //因为只需要读取第一行内容，读完就跑
                     TLR.SetApiKey(bufferedReader.readLine());
+                    //关闭输入流
+                    bufferedReader.close();
+                    read.close();
                     getLogger().info("已成功读取ApiKey");
                 } else {
                     getLogger().warning("ApiKey不是一个合法的文件！");
                 }
             } else {
+                //没有文件就创建文件
                 if (KeyFile.getParentFile().mkdirs() && KeyFile.createNewFile()) {
                     getLogger().warning("未找到ApiKey文件！已初始化该文件，请在文件内添加机器人ApiKey（注意不要有换行）");
                 } else {
@@ -118,7 +128,7 @@ public class PluginMain extends JavaPlugin implements Listener {
      * @param sender 发送者，可强转为 [Player] 类型
      * @param cmd    命令首
      * @param label  命令缩写
-     * @param args   命令参数(除了命令首外其他空格写的)
+     * @param args   命令参数(和main的args参数一样)
      * @return 是否完成处理
      */
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
