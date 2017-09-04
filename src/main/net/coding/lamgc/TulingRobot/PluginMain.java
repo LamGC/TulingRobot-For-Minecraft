@@ -1,4 +1,4 @@
-/**
+/*
  * This file is part of TulingRobot_For_Minecraft.
  *
  * TulingRobot_For_Minecraft is free software: you can redistribute it and/or modify
@@ -164,7 +164,13 @@ public class PluginMain extends JavaPlugin implements Listener {
      */
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerCharEvent(AsyncPlayerChatEvent event) {
+        if(event.isCancelled()){
+            return;
+        }
         getLogger().info(event.getFormat());
         getLogger().info(event.getMessage());
+
     }
+
+
 }
