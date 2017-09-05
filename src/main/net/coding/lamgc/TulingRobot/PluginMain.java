@@ -68,7 +68,7 @@ public class PluginMain extends JavaPlugin implements Listener {
     /**
      * 载入ApiKey
      */
-    private void LoadApiKey() {
+    private boolean LoadApiKey() {
         try {
             //获取文件File对象
             File KeyFile = new File(getDataFolder().getPath() + "/ApiKey.txt");
@@ -79,7 +79,7 @@ public class PluginMain extends JavaPlugin implements Listener {
                     //确定文件是否为空
                     if (KeyFile.length() == 0L) {
                         getLogger().warning("ApiKey文件为空，请填入ApiKey！");
-                        return;
+                        return false;
                     }
                     //开始读取
                     InputStreamReader read = new InputStreamReader(
@@ -94,19 +94,24 @@ public class PluginMain extends JavaPlugin implements Listener {
                     getLogger().info("已成功读取ApiKey");
                 } else {
                     getLogger().warning("ApiKey不是一个合法的文件！");
+                    return false;
                 }
             } else {
                 //没有文件就创建文件
                 if (KeyFile.getParentFile().mkdirs() && KeyFile.createNewFile()) {
                     getLogger().warning("未找到ApiKey文件！已初始化该文件，请在文件内添加机器人ApiKey（注意不要有换行）");
+                    return false;
                 } else {
                     getLogger().warning("未找到ApiKey文件！尝试初始化文件失败！");
+                    return false;
                 }
             }
         } catch (IOException e) {
             getLogger().warning("发生了一个严重的异常：");
             e.printStackTrace();
+            return false;
         }
+        return true;
     }
 
     /**
@@ -172,14 +177,24 @@ public class PluginMain extends JavaPlugin implements Listener {
         }else if(cmd.getName().equalsIgnoreCase("setrobot") && args.length != 0){
             //两个参数，则为修改ApiKey而不重载
             if(args[0].equalsIgnoreCase("setkey") && args.length == 2 || args.length == 3){
+                getLogger().info("参数数量:" + args.length);
                 //标准图灵机器人ApiKey是32位长度的
                 if(args[1].length() == 32){
                     //更改ApiKey
                     try {
                         SetApiKey(args[1]);
-                        if(args.length == 3 && args[2].equalsIgnoreCase("--reload") && args[2].equalsIgnoreCase("-r")){
-                            LoadApiKey();
+                        sender.sendMessage("已成功修改ApiKey");
+                        getLogger().info("ApiKey已修改，新ApiKey:[" + args[1] + "]");
+                        if(args.length == 3 && args[2].equalsIgnoreCase("--reload") || args[2].equalsIgnoreCase("-r")){
+                            getLogger().info("正在载入ApiKey");
+                            if(LoadApiKey()){
+                                sender.sendMessage("已成功载入ApiKey");
+                            }else{
+                                getLogger().info("载入ApiKey失败");
+                                sender.sendMessage("载入ApiKey失败");
+                            }
                         }
+                        return true;
                     } catch (IOException e) {
                         sender.sendMessage("执行操作时发生了一个异常！详细信息请查看服务器控制台。");
                         e.printStackTrace();
@@ -189,8 +204,15 @@ public class PluginMain extends JavaPlugin implements Listener {
             }else
                 //或者重载Key
                 //以后会重载配置
-                if(args[1].equalsIgnoreCase("reload")){
-                LoadApiKey();
+                if(args.length == 1 && args[0].equalsIgnoreCase("reload")){
+                    getLogger().info("正在载入ApiKey");
+                    if(LoadApiKey()){
+                        getLogger().info("已成功载入ApiKey");
+                        sender.sendMessage("已成功载入ApiKey");
+                    }else{
+                        getLogger().info("载入ApiKey失败");
+                        sender.sendMessage("载入ApiKey失败");
+                    }
                 return true;
             }
         }
