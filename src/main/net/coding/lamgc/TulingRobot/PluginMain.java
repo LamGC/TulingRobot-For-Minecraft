@@ -174,10 +174,9 @@ public class PluginMain extends JavaPlugin implements Listener {
                 getLogger().warning("[错误]" + TLR.getErrorString(code) + "(" + code + ")");
             }
             return true;
-        }else if(cmd.getName().equalsIgnoreCase("setrobot") && args.length != 0){
+        }else if(cmd.getName().equalsIgnoreCase("setrobot")){
             //两个参数，则为修改ApiKey而不重载
             if(args[0].equalsIgnoreCase("setkey") && args.length == 2 || args.length == 3){
-                getLogger().info("参数数量:" + args.length);
                 //标准图灵机器人ApiKey是32位长度的
                 if(args[1].length() == 32){
                     //更改ApiKey
@@ -215,6 +214,15 @@ public class PluginMain extends JavaPlugin implements Listener {
                     }
                 return true;
             }
+
+            //帮助说明
+            String u =
+                    "用法:/setrobot [选项] <参数...>" +
+                            "   选项:" +
+                            "setkey - 设置新的ApiKey【命令用法：/setrobot setkey {ApiKey} <--reload/-r>】" +
+                            "reload - 重载设置，目前仅重载ApiKey【命令用法：/setrobot reload】";
+
+            sender.sendMessage(u);
         }
         return false;
     }
