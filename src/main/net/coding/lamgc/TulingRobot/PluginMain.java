@@ -110,6 +110,20 @@ public class PluginMain extends JavaPlugin implements Listener {
     }
 
     /**
+     * 置ApiKey到文件
+     * @param ApiKey 新的ApiKey\n
+     * @throws IOException 写入文件时可能发生的异常
+     */
+    private void SetApiKey(String ApiKey) throws IOException {
+        //获取文件File对象
+        File KeyFile = new File(getDataFolder().getPath() + "/ApiKey.txt");
+        FileOutputStream fos = new FileOutputStream(KeyFile);
+        fos.write(ApiKey.getBytes("UTF-8"));
+        fos.flush();
+        fos.close();
+    }
+
+    /**
      * 插件已启用(插件载入完成)
      */
     public void onEnable() {
@@ -127,18 +141,20 @@ public class PluginMain extends JavaPlugin implements Listener {
      * 命令处理方法
      * @param sender 发送者，可强转为 [Player] 类型
      * @param cmd    命令首
-     * @param label  命令缩写
+     * @param label  命令缩写(不太清楚怎么用)
      * @param args   命令参数(和main的args参数一样)
      * @return 是否完成处理
      */
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
         //如果是调用机器人的命令
         if (cmd.getName().equalsIgnoreCase("robot") && args.length == 1) {
-            JsonObject rem = null;
+            JsonObject rem;
             try {
                 rem = TLR.Robot(args[0], sender.getName());
             } catch (UnsupportedEncodingException e) {
+                sender.sendMessage("调用机器人时发生一个异常！详细信息请查看服务器控制台。");
                 e.printStackTrace();
+                return true;
             }
             assert rem != null;
             int code = rem.get("code").getAsInt();
@@ -153,6 +169,30 @@ public class PluginMain extends JavaPlugin implements Listener {
                 getLogger().warning("[错误]" + TLR.getErrorString(code) + "(" + code + ")");
             }
             return true;
+        }else if(cmd.getName().equalsIgnoreCase("setrobot") && args.length != 0){
+            //两个参数，则为修改ApiKey而不重载
+            if(args[0].equalsIgnoreCase("setkey") && args.length == 2 || args.length == 3){
+                //标准图灵机器人ApiKey是32位长度的
+                if(args[1].length() == 32){
+                    //更改ApiKey
+                    try {
+                        SetApiKey(args[1]);
+                        if(args.length == 3 && args[2].equalsIgnoreCase("--reload") && args[2].equalsIgnoreCase("-r")){
+                            LoadApiKey();
+                        }
+                    } catch (IOException e) {
+                        sender.sendMessage("执行操作时发生了一个异常！详细信息请查看服务器控制台。");
+                        e.printStackTrace();
+                        return true;
+                    }
+                }
+            }else
+                //或者重载Key
+                //以后会重载配置
+                if(args[1].equalsIgnoreCase("reload")){
+                LoadApiKey();
+                return true;
+            }
         }
         return false;
     }
@@ -164,9 +204,12 @@ public class PluginMain extends JavaPlugin implements Listener {
      */
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerCharEvent(AsyncPlayerChatEvent event) {
+        //如果事件被取消
         if(event.isCancelled()){
+            //放弃处理，防止浪费调用次数
             return;
         }
+        //开发所留下的调试代码
         getLogger().info(event.getFormat());
         getLogger().info(event.getMessage());
 
