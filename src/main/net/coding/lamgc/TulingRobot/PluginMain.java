@@ -87,13 +87,21 @@ public class PluginMain extends JavaPlugin implements Listener {
                             "UTF-8");//考虑到编码格式
                     BufferedReader bufferedReader = new BufferedReader(read);
                     //因为只需要读取第一行内容，读完就跑
-                    TLR.SetApiKey(bufferedReader.readLine());
+                    String k = bufferedReader.readLine();
+                    if(k.length() == 32){
+                        TLR.SetApiKey(k);
+                    }else{
+                        getLogger().warning("不是一个标准的ApiKey！");
+                        bufferedReader.close();
+                        read.close();
+                        return false;
+                    }
                     //关闭输入流
                     bufferedReader.close();
                     read.close();
                     getLogger().info("已成功读取ApiKey");
                 } else {
-                    getLogger().warning("ApiKey不是一个合法的文件！");
+                    getLogger().warning("ApiKey不是文件！");
                     return false;
                 }
             } else {
@@ -196,6 +204,7 @@ public class PluginMain extends JavaPlugin implements Listener {
                         return true;
                     } catch (IOException e) {
                         sender.sendMessage("执行操作时发生了一个异常！详细信息请查看服务器控制台。");
+                        getLogger().warning("发送了一个严重的问题：");
                         e.printStackTrace();
                         return true;
                     }
