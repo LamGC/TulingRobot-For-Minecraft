@@ -76,6 +76,8 @@ public class TulingRobot {
         sj.addProperty("userid",UserID);
         //String re = HttpRequest.sendGet(getApiUrl(true),"key=" + ApiKey + "&info=" + URLEncoder.encode(msg,"UTF-8") + "&userid=" + URLEncoder.encode(UserID,"UTF-8"));
         String re = HttpRequest.sendPost(getApiUrl(true),new String(sj.toString().getBytes("UTF-8")),"application/json");
+        System.out.println("[调试] JsonString:" + re);
+        //TODO:2017/09/10 - 这里可能会获取到空文本，导致生成JsonObject对象失败
         return new JsonParser().parse(re).getAsJsonObject();
     }
 

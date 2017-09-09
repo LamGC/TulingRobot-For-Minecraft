@@ -40,6 +40,7 @@ public class PluginMain extends JavaPlugin implements Listener {
     //图灵机器人实例
     private static TulingRobot TLR = new TulingRobot();
     private Properties cfg = new Properties();
+    private boolean Config_Modified = false;
 
     public static void main(String[] args) throws UnsupportedEncodingException {
         System.out.println("请把本Jar文件放入服务器目录下plugins文件夹即可");
@@ -220,7 +221,7 @@ public class PluginMain extends JavaPlugin implements Listener {
 
         //新方法
         cfg.put("Robot.ApiKey",ApiKey);
-
+        Config_Modified = true;
     }
 
     /**
@@ -236,11 +237,13 @@ public class PluginMain extends JavaPlugin implements Listener {
      */
     public void onDisable() {
         //保存配置
-        try {
-            SaveConfig();
-        } catch (IOException e) {
-            getLogger().warning("保存配置时发生异常：");
-            e.printStackTrace();
+        if(Config_Modified){
+            try {
+                SaveConfig();
+            } catch (IOException e) {
+                getLogger().warning("保存配置时发生异常：");
+                e.printStackTrace();
+            }
         }
         //停用插件时注销事件监听器
         HandlerList.unregisterAll((Listener) this);
