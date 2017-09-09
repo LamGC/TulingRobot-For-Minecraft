@@ -28,7 +28,6 @@ import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.*;
-import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.Properties;
 
@@ -66,12 +65,18 @@ public class PluginMain extends JavaPlugin implements Listener {
      */
     public void onLoad() {
         getLogger().info("插件载入中...");
-        LoadApiKey();
+        try {
+            LoadConfig();
+        } catch (IOException e) {
+            getLogger().warning("载入配置时发生异常：");
+            e.printStackTrace();
+        }
         getLogger().info("插件已就绪");
     }
 
     /**
      * 载入ApiKey
+     * @deprecated 已将ApiKey整合到config，本方法已弃用
      * @return 是否成功载入
      */
     private boolean LoadApiKey() {
@@ -149,16 +154,35 @@ public class PluginMain extends JavaPlugin implements Listener {
      * @return 返回是否载入成功
      */
     private boolean LoadConfig() throws IOException {
+        File df = getDataFolder();
+        if(!df.exists() || df.isFile()){
+            df.delete();
+            if(!df.mkdir()){
+                getLogger().warning("插件数据文件夹创建失败！请手动创建【TulingRobot】文件夹");
+                return false;
+            }
+        }
+        //指定配置文件路径获取File对象
         File configFile = new File(getDataFolder().getPath() + "/config.properties");
+        //检查文件是否存在
         if(configFile.exists()){
+            //确保 是一个文件
             if(configFile.isFile()){
+                //载入配置
                 cfg.load(new InputStreamReader(new FileInputStream(configFile),"UTF-8"));
+                return true;
             }else{
+                //不是，返回
                 getLogger().warning("config.properties不是文件！");
                 return false;
             }
         }else{
-            InputStream config = this.getClass().getResourceAsStream("config.properties");
+            //没有文件，生成一个
+            InputStream config = this.getClass().getResourceAsStream("/config.properties");
+            if(config == null){
+                getLogger().warning("获取默认配置文件失败！请使用解压工具打开插件，解压【config.properties】文件到[plugins/TulingRobot]目录！");
+                return false;
+            }
             byte[] b = new byte[config.available()];
             if(config.read(b) == config.available()){
                 FileOutputStream fos = new FileOutputStream(configFile);
@@ -167,12 +191,19 @@ public class PluginMain extends JavaPlugin implements Listener {
                 fos.close();
                 cfg.load(new InputStreamReader(new FileInputStream(configFile),"UTF-8"));
                 getLogger().warning("config.properties文件不存在，插件已自动创建，进行设置后使用【/setRobot reload】重载配置");
+                return false;
             }
         }
-        LoadApiKey_New();
-        return true;
+        if(!LoadApiKey_New()){
+            getLogger().warning("ApiKey重载失败");
+            return false;
+        }
+        return false;
     }
 
+    private void SaveConfig() throws IOException {
+        cfg.store(new FileOutputStream(new File(getDataFolder().getPath() + "/config.properties")),"TulingRobot - Config");
+    }
 
     /**
      * 置ApiKey到文件
@@ -180,12 +211,16 @@ public class PluginMain extends JavaPlugin implements Listener {
      * @throws IOException 写入文件时可能发生的异常
      */
     private void SetApiKey(String ApiKey) throws IOException {
-        //获取文件File对象
+        /*//获取文件File对象
         File KeyFile = new File(getDataFolder().getPath() + "/ApiKey.txt");
         FileOutputStream fos = new FileOutputStream(KeyFile);
         fos.write(ApiKey.getBytes("UTF-8"));
         fos.flush();
-        fos.close();
+        fos.close();*/
+
+        //新方法
+        cfg.put("Robot.ApiKey",ApiKey);
+
     }
 
     /**
@@ -200,6 +235,13 @@ public class PluginMain extends JavaPlugin implements Listener {
      * 插件被停用(服务器关闭时)
      */
     public void onDisable() {
+        //保存配置
+        try {
+            SaveConfig();
+        } catch (IOException e) {
+            getLogger().warning("保存配置时发生异常：");
+            e.printStackTrace();
+        }
         //停用插件时注销事件监听器
         HandlerList.unregisterAll((Listener) this);
         getLogger().info("插件已停用");
@@ -237,7 +279,9 @@ public class PluginMain extends JavaPlugin implements Listener {
                 getLogger().warning("[错误]" + TLR.getErrorString(code) + "(" + code + ")");
             }
             return true;
-        }else if(cmd.getName().equalsIgnoreCase("setrobot")){
+        }else
+            //------------------------------机器人设置命令------------------------------
+            if(cmd.getName().equalsIgnoreCase("setrobot")){
             //两个参数，则为修改ApiKey而不重载
             if(args[0].equalsIgnoreCase("setkey") && args.length == 2 || args.length == 3){
                 //标准图灵机器人ApiKey是32位长度的
@@ -248,6 +292,7 @@ public class PluginMain extends JavaPlugin implements Listener {
                         sender.sendMessage("已成功修改ApiKey");
                         getLogger().info("ApiKey已修改，新ApiKey:[" + args[1] + "]");
                         if(args.length == 3 && args[2].equalsIgnoreCase("--reload") || args[2].equalsIgnoreCase("-r")){
+                            //重新载入配置
                             getLogger().info("正在载入配置");
                             if(LoadConfig()){
                                 getLogger().info("已成功载入配置");
@@ -286,7 +331,6 @@ public class PluginMain extends JavaPlugin implements Listener {
                     }
                 return true;
             }
-
             //帮助说明
             String u =
                     "用法:/setrobot [选项] <参数...>" +
@@ -295,6 +339,7 @@ public class PluginMain extends JavaPlugin implements Listener {
                             "reload - 重载设置，目前仅重载ApiKey【命令用法：/setrobot reload】";
 
             sender.sendMessage(u);
+            return true;
         }
         return false;
     }
@@ -306,9 +351,10 @@ public class PluginMain extends JavaPlugin implements Listener {
      */
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerCharEvent(AsyncPlayerChatEvent event) {
-        //TODO:2017/09/08 - 玩家聊天事件，获取消息后发送公屏信息
+        getLogger().info("[调试] " + "玩家聊天事件被触发");
         if(event.isCancelled()){
             //如果事件被取消，则放弃处理，防止浪费调用次数
+            getLogger().info("[调试] " + "事件被取消，放弃处理");
             return;
         }
         //开发所留下的调试代码
@@ -318,29 +364,40 @@ public class PluginMain extends JavaPlugin implements Listener {
 
         //如果停用了聊天对话模式，则忽略事件
         if(!cfg.getProperty("Dialogue.Chat_Trigger","false").equalsIgnoreCase("true")){
+            getLogger().info("[调试] " + "聊天对话模式被关闭，放弃处理");
             return;
         }
         //前缀，如果需要
         //前缀如果不为空
-        String prefix = cfg.getProperty("Dialogue.Trigger_Prefix","");
+        String prefix = cfg.getProperty("Dialogue.Trigger_Prefix");
         if(!prefix.equalsIgnoreCase("")){
-            if(event.getMessage().indexOf(prefix) != 1){
+            getLogger().info("[调试] " + "前缀在信息的位置：" + event.getMessage().indexOf(prefix));
+            if(event.getMessage().indexOf(prefix) != 0){
                 //不处理非指定前缀消息
+                getLogger().info("[调试] " + "前缀不正确，放弃处理");
                 return;
             }
         }
+        //准备好一个JsonObject变量用来获取机器人返回值
         JsonObject rj = null;
         try {
+            //调用机器人
+            getLogger().info("[调试] " + "调用机器人...");
             rj = TLR.Robot(event.getMessage(), event.getPlayer().getName());
+            getLogger().info("[调试] " + "调用完毕，开始处理");
         } catch (UnsupportedEncodingException e) {
             getLogger().warning("消息处理失败！编码转换错误：");
             e.printStackTrace();
         }
-        String rs = cfg.getProperty("Robot.Name","Robot") + ":";
+        //前缀设置
+        String rs = cfg.getProperty("Robot.Name","").equalsIgnoreCase("") ? "" : cfg.getProperty("Robot.Name") + ":";
+        getLogger().info("[调试] " + "机器人回复前缀：" + rs);
+        //防止空指针的检查代码
         if(rj == null){
             getLogger().warning("调用机器人失败！");
             return;
         }
+        //根据code设置返回值
         int code = rj.get("code").getAsInt();
         if (code == TulingRobot.TLCode.Text) {
             rs = rs + rj.get("text").getAsString();
@@ -352,7 +409,9 @@ public class PluginMain extends JavaPlugin implements Listener {
             rs = rs + "[错误]" + TLR.getErrorString(code) + "(" + code + ")";
             getLogger().warning("[错误]" + TLR.getErrorString(code) + "(" + code + ")");
         }
-        //发送信息
+        getLogger().info("[调试] " + "最终消息：" + rs);
+        getLogger().info("[调试] " + "开始发送公屏信息");
+        //发送公屏信息
         sendMsgToOnlinePlayer(rs);
     }
 
@@ -362,10 +421,14 @@ public class PluginMain extends JavaPlugin implements Listener {
      * @param Msg 信息
      */
     private void sendMsgToOnlinePlayer(String Msg){
+        //获取在线玩家
         Collection<? extends Player> onlinePlayers = getServer().getOnlinePlayers();
+        //初始化Player数组
         Player[] op = new Player[onlinePlayers.size()];
+        //emmmm，这里好像有问题啊
         Player[] players = onlinePlayers.toArray(op);
         for (Player player : players) {
+            //发送信息
             player.sendMessage(Msg);
         }
     }
