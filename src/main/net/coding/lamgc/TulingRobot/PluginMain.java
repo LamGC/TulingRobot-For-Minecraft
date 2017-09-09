@@ -28,6 +28,7 @@ import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.*;
+import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.Properties;
 
@@ -39,8 +40,7 @@ public class PluginMain extends JavaPlugin implements Listener {
 
     //图灵机器人实例
     private static TulingRobot TLR = new TulingRobot();
-    private Properties cfg;
-
+    private Properties cfg = new Properties();
 
     public static void main(String[] args) throws UnsupportedEncodingException {
         System.out.println("请把本Jar文件放入服务器目录下plugins文件夹即可");
@@ -159,9 +159,18 @@ public class PluginMain extends JavaPlugin implements Listener {
             }
         }else{
             InputStream config = this.getClass().getResourceAsStream("config.properties");
-
+            byte[] b = new byte[config.available()];
+            if(config.read(b) == config.available()){
+                FileOutputStream fos = new FileOutputStream(configFile);
+                fos.write(b);
+                fos.flush();
+                fos.close();
+                cfg.load(new InputStreamReader(new FileInputStream(configFile),"UTF-8"));
+                getLogger().warning("config.properties文件不存在，插件已自动创建，进行设置后使用【/setRobot reload】重载配置");
+            }
         }
-        return false;
+        LoadApiKey_New();
+        return true;
     }
 
 
@@ -239,17 +248,18 @@ public class PluginMain extends JavaPlugin implements Listener {
                         sender.sendMessage("已成功修改ApiKey");
                         getLogger().info("ApiKey已修改，新ApiKey:[" + args[1] + "]");
                         if(args.length == 3 && args[2].equalsIgnoreCase("--reload") || args[2].equalsIgnoreCase("-r")){
-                            getLogger().info("正在载入ApiKey");
-                            if(LoadApiKey()){
-                                sender.sendMessage("已成功载入ApiKey");
+                            getLogger().info("正在载入配置");
+                            if(LoadConfig()){
+                                getLogger().info("已成功载入配置");
+                                sender.sendMessage("已成功载入配置");
                             }else{
-                                getLogger().info("载入ApiKey失败");
-                                sender.sendMessage("载入ApiKey失败");
+                                getLogger().info("载入配置失败");
+                                sender.sendMessage("载入配置失败");
                             }
                         }
                         return true;
                     } catch (IOException e) {
-                        sender.sendMessage("执行操作时发生了一个异常！详细信息请查看服务器控制台。");
+                        sender.sendMessage("执行操作时发生了一个异常！详细信息请查看服务器控制台！");
                         getLogger().warning("发送了一个严重的问题：");
                         e.printStackTrace();
                         return true;
@@ -259,13 +269,20 @@ public class PluginMain extends JavaPlugin implements Listener {
                 //或者重载Key
                 //以后会重载配置
                 if(args.length == 1 && args[0].equalsIgnoreCase("reload")){
-                    getLogger().info("正在载入ApiKey");
-                    if(LoadApiKey()){
-                        getLogger().info("已成功载入ApiKey");
-                        sender.sendMessage("已成功载入ApiKey");
-                    }else{
-                        getLogger().info("载入ApiKey失败");
-                        sender.sendMessage("载入ApiKey失败");
+                    getLogger().info("正在载入配置");
+                    try {
+                        //读取配置
+                        if(LoadConfig()){
+                            getLogger().info("已成功载入配置");
+                            sender.sendMessage("已成功载入配置");
+                        }else{
+                            getLogger().info("载入配置失败");
+                            sender.sendMessage("载入配置失败");
+                        }
+                    } catch (IOException e) {
+                        getLogger().info("载入配置时发生异常：");
+                        sender.sendMessage("载入配置出错，详细信息请查看服务器控制台！");
+                        e.printStackTrace();
                     }
                 return true;
             }
@@ -348,12 +365,8 @@ public class PluginMain extends JavaPlugin implements Listener {
         Collection<? extends Player> onlinePlayers = getServer().getOnlinePlayers();
         Player[] op = new Player[onlinePlayers.size()];
         Player[] players = onlinePlayers.toArray(op);
-        for(int i = 0;i < players.length;i++){
-            players[i].sendMessage(Msg);
+        for (Player player : players) {
+            player.sendMessage(Msg);
         }
-    }
-
-    public void setCfg(Properties cfg) {
-        this.cfg = cfg;
     }
 }
