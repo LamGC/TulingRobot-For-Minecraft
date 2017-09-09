@@ -29,6 +29,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.*;
 import java.util.Collection;
+import java.util.Properties;
 
 /**
  * 插件及程序的主类
@@ -38,6 +39,8 @@ public class PluginMain extends JavaPlugin implements Listener {
 
     //图灵机器人实例
     private static TulingRobot TLR = new TulingRobot();
+    Properties cfg;
+
 
     public static void main(String[] args) throws UnsupportedEncodingException {
         System.out.println("请把本Jar文件放入服务器目录下plugins文件夹即可");
@@ -69,6 +72,7 @@ public class PluginMain extends JavaPlugin implements Listener {
 
     /**
      * 载入ApiKey
+     * @return 是否成功载入
      */
     private boolean LoadApiKey() {
         try {
@@ -123,6 +127,26 @@ public class PluginMain extends JavaPlugin implements Listener {
         }
         return true;
     }
+
+    /**
+     * 载入配置
+     * @return 返回是否载入成功
+     */
+    private boolean LoadConfig() throws IOException {
+        File configFile = new File(getDataFolder().getPath() + "/config.properties");
+        if(configFile.exists()){
+            if(configFile.isFile()){
+                cfg.load(new InputStreamReader(new FileInputStream(configFile),"UTF-8"));
+            }else{
+                getLogger().warning("config.properties不是文件！");
+                return false;
+            }
+        }else{
+            this.getClass().getResourceAsStream("config.properties");
+        }
+        return false;
+    }
+
 
     /**
      * 置ApiKey到文件
@@ -257,10 +281,23 @@ public class PluginMain extends JavaPlugin implements Listener {
         getLogger().info("PlayerCharEventInfo:");
         getLogger().info(event.getFormat());
         getLogger().info(event.getMessage());
-        sendMsgToAllPlayer(event.getPlayer().getName() + "说：" + event.getMessage());
+        //前缀，如果需要
+        if(event.getMessage().indexOf("*") == 1){
+
+        }
     }
 
-    private void sendMsgToAllPlayer(String Msg){
-
+    /**
+     * 发送公屏信息<br/>
+     * 其实是发给所有玩家一条消息而已233
+     * @param Msg 信息
+     */
+    private void sendMsgToOnlinePlayer(String Msg){
+        Collection<? extends Player> onlinePlayers = getServer().getOnlinePlayers();
+        Player[] op = new Player[onlinePlayers.size()];
+        Player[] players = onlinePlayers.toArray(op);
+        for(int i = 0;i < players.length;i++){
+            players[i].sendMessage(Msg);
+        }
     }
 }
