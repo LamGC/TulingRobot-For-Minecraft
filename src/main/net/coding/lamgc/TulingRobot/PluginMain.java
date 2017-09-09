@@ -39,7 +39,7 @@ public class PluginMain extends JavaPlugin implements Listener {
 
     //图灵机器人实例
     private static TulingRobot TLR = new TulingRobot();
-    Properties cfg;
+    private Properties cfg;
 
 
     public static void main(String[] args) throws UnsupportedEncodingException {
@@ -129,6 +129,22 @@ public class PluginMain extends JavaPlugin implements Listener {
     }
 
     /**
+     * 新的载入
+     * @return ApiKey是否载入成功
+     */
+    private boolean LoadApiKey_New(){
+        String Key = cfg.getProperty("Robot.ApiKey","");
+        if(Key.equalsIgnoreCase("")){
+            getLogger().warning("ApiKey文件为空，请填入ApiKey！");
+        }else if(Key.length() != 32){
+            getLogger().warning("不是一个标准的ApiKey！");
+            return false;
+        }
+        TLR.SetApiKey(Key);
+        return true;
+    }
+
+    /**
      * 载入配置
      * @return 返回是否载入成功
      */
@@ -142,7 +158,8 @@ public class PluginMain extends JavaPlugin implements Listener {
                 return false;
             }
         }else{
-            this.getClass().getResourceAsStream("config.properties");
+            InputStream config = this.getClass().getResourceAsStream("config.properties");
+
         }
         return false;
     }
@@ -281,10 +298,45 @@ public class PluginMain extends JavaPlugin implements Listener {
         getLogger().info("PlayerCharEventInfo:");
         getLogger().info(event.getFormat());
         getLogger().info(event.getMessage());
-        //前缀，如果需要
-        if(event.getMessage().indexOf("*") == 1){
 
+        //如果停用了聊天对话模式，则忽略事件
+        if(!cfg.getProperty("Dialogue.Chat_Trigger","false").equalsIgnoreCase("true")){
+            return;
         }
+        //前缀，如果需要
+        //前缀如果不为空
+        String prefix = cfg.getProperty("Dialogue.Trigger_Prefix","");
+        if(!prefix.equalsIgnoreCase("")){
+            if(event.getMessage().indexOf(prefix) != 1){
+                //不处理非指定前缀消息
+                return;
+            }
+        }
+        JsonObject rj = null;
+        try {
+            rj = TLR.Robot(event.getMessage(), event.getPlayer().getName());
+        } catch (UnsupportedEncodingException e) {
+            getLogger().warning("消息处理失败！编码转换错误：");
+            e.printStackTrace();
+        }
+        String rs = cfg.getProperty("Robot.Name","Robot") + ":";
+        if(rj == null){
+            getLogger().warning("调用机器人失败！");
+            return;
+        }
+        int code = rj.get("code").getAsInt();
+        if (code == TulingRobot.TLCode.Text) {
+            rs = rs + rj.get("text").getAsString();
+        } else if (code == TulingRobot.TLCode.Url) {
+            rs = rs + rj.get("text") + "(Url:" + rj.get("url") + ")";
+        } else if (code >= TulingRobot.TLCode.News && code <= TulingRobot.TLCode.children_Poetry) {
+            rs = rs + "[插件]本功能咱不支持";
+        } else if (code >= TulingRobot.TLCode.Error_KeyError) {
+            rs = rs + "[错误]" + TLR.getErrorString(code) + "(" + code + ")";
+            getLogger().warning("[错误]" + TLR.getErrorString(code) + "(" + code + ")");
+        }
+        //发送信息
+        sendMsgToOnlinePlayer(rs);
     }
 
     /**
@@ -299,5 +351,9 @@ public class PluginMain extends JavaPlugin implements Listener {
         for(int i = 0;i < players.length;i++){
             players[i].sendMessage(Msg);
         }
+    }
+
+    public void setCfg(Properties cfg) {
+        this.cfg = cfg;
     }
 }
