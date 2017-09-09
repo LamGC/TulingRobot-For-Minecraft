@@ -27,11 +27,10 @@
  - reload - 重载配置，目前仅重载ApiKey
 <br/>
 
-## 使用图灵机器人Api ##
-在需要使用Api的类导入包:`import net.coding.lamgc.TulingRobot.TulingRobot`
-然后new一个对象出来:`new TulingRobot(String ApiKey);` 或 `new TulingRobot();`
-
-
+## 使用图灵机器人Api简易教程 ##
+在需要使用Api的类导入包:`import net.coding.lamgc.TulingRobot.TulingRobot`<br/>
+然后new一个对象出来:`new TulingRobot(String ApiKey);` 或 `new TulingRobot();`<br/>
+使用`Robot(String info, String UserID)`方法调用机器人(ApiV1)即可
 
 ## LICENSE ##
 本项目遵循GPLv3协议开源<br/>
@@ -43,5 +42,4 @@
 申请将在3个工作日内被处理，申请被处理后issue会被关闭，结果回复在issue。<br/>
 目前已得到允许，不需要开源的项目:
 > - (目前还没有呢)
-
 

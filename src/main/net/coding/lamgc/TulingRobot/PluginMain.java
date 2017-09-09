@@ -19,13 +19,16 @@ package net.coding.lamgc.TulingRobot;
 import com.google.gson.JsonObject;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
+import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.*;
+import java.util.Collection;
 
 /**
  * 插件及程序的主类
@@ -61,7 +64,6 @@ public class PluginMain extends JavaPlugin implements Listener {
     public void onLoad() {
         getLogger().info("插件载入中...");
         LoadApiKey();
-        //getServer().getPluginManager().registerEvents(this, this);
         getLogger().info("插件已就绪");
     }
 
@@ -140,6 +142,7 @@ public class PluginMain extends JavaPlugin implements Listener {
      * 插件已启用(插件载入完成)
      */
     public void onEnable() {
+        getServer().getPluginManager().registerEvents(this, this);
         getLogger().info("插件已启用");
     }
 
@@ -147,6 +150,8 @@ public class PluginMain extends JavaPlugin implements Listener {
      * 插件被停用(服务器关闭时)
      */
     public void onDisable() {
+        //停用插件时注销事件监听器
+        HandlerList.unregisterAll((Listener) this);
         getLogger().info("插件已停用");
     }
 
@@ -243,16 +248,19 @@ public class PluginMain extends JavaPlugin implements Listener {
      */
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerCharEvent(AsyncPlayerChatEvent event) {
-        //如果事件被取消
+        //TODO:2017/09/08 - 玩家聊天事件，获取消息后发送公屏信息
         if(event.isCancelled()){
-            //放弃处理，防止浪费调用次数
+            //如果事件被取消，则放弃处理，防止浪费调用次数
             return;
         }
         //开发所留下的调试代码
+        getLogger().info("PlayerCharEventInfo:");
         getLogger().info(event.getFormat());
         getLogger().info(event.getMessage());
-
+        sendMsgToAllPlayer(event.getPlayer().getName() + "说：" + event.getMessage());
     }
 
+    private void sendMsgToAllPlayer(String Msg){
 
+    }
 }
