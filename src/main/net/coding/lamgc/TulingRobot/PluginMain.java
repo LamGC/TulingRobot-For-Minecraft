@@ -76,65 +76,6 @@ public class PluginMain extends JavaPlugin implements Listener {
     }
 
     /**
-     * 载入ApiKey
-     * @deprecated 已将ApiKey整合到config，本方法已弃用
-     * @return 是否成功载入
-     */
-    private boolean LoadApiKey() {
-        try {
-            //获取文件File对象
-            File KeyFile = new File(getDataFolder().getPath() + "/ApiKey.txt");
-            //检查文件是否存在
-            if (KeyFile.exists()) {
-                //检查是否为一个文件
-                if (KeyFile.isFile()) {
-                    //确定文件是否为空
-                    if (KeyFile.length() == 0L) {
-                        getLogger().warning("ApiKey文件为空，请填入ApiKey！");
-                        return false;
-                    }
-                    //开始读取
-                    InputStreamReader read = new InputStreamReader(
-                            new FileInputStream(KeyFile),
-                            "UTF-8");//考虑到编码格式
-                    BufferedReader bufferedReader = new BufferedReader(read);
-                    //因为只需要读取第一行内容，读完就跑
-                    String k = bufferedReader.readLine();
-                    if(k.length() == 32){
-                        TLR.SetApiKey(k);
-                    }else{
-                        getLogger().warning("不是一个标准的ApiKey！");
-                        bufferedReader.close();
-                        read.close();
-                        return false;
-                    }
-                    //关闭输入流
-                    bufferedReader.close();
-                    read.close();
-                    getLogger().info("已成功读取ApiKey");
-                } else {
-                    getLogger().warning("ApiKey不是文件！");
-                    return false;
-                }
-            } else {
-                //没有文件就创建文件
-                if (KeyFile.getParentFile().mkdirs() && KeyFile.createNewFile()) {
-                    getLogger().warning("未找到ApiKey文件！已初始化该文件，请在文件内添加机器人ApiKey（注意不要有换行）");
-                    return false;
-                } else {
-                    getLogger().warning("未找到ApiKey文件！尝试初始化文件失败！");
-                    return false;
-                }
-            }
-        } catch (IOException e) {
-            getLogger().warning("发生了一个严重的异常：");
-            e.printStackTrace();
-            return false;
-        }
-        return true;
-    }
-
-    /**
      * 新的载入
      * @return ApiKey是否载入成功
      */
@@ -269,7 +210,11 @@ public class PluginMain extends JavaPlugin implements Listener {
                 e.printStackTrace();
                 return true;
             }
-            assert rem != null;
+            if(rem == null){
+                getLogger().warning("调用机器人失败！(调用返回不是合法Json)");
+                sender.sendMessage("[错误] 机器人调用失败！");
+                return true;
+            }
             int code = rem.get("code").getAsInt();
             if (code == TulingRobot.TLCode.Text) {
                 sender.sendMessage(rem.get("text").getAsString());
@@ -360,6 +305,7 @@ public class PluginMain extends JavaPlugin implements Listener {
             getLogger().info("[调试] " + "事件被取消，放弃处理");
             return;
         }
+
         //开发所留下的调试代码
         getLogger().info("PlayerCharEventInfo:");
         getLogger().info(event.getFormat());
@@ -370,6 +316,7 @@ public class PluginMain extends JavaPlugin implements Listener {
             getLogger().info("[调试] " + "聊天对话模式被关闭，放弃处理");
             return;
         }
+
         //前缀，如果需要
         //前缀如果不为空
         String prefix = cfg.getProperty("Dialogue.Trigger_Prefix");
@@ -381,6 +328,7 @@ public class PluginMain extends JavaPlugin implements Listener {
                 return;
             }
         }
+
         //准备好一个JsonObject变量用来获取机器人返回值
         JsonObject rj = null;
         try {
@@ -392,14 +340,17 @@ public class PluginMain extends JavaPlugin implements Listener {
             getLogger().warning("消息处理失败！编码转换错误：");
             e.printStackTrace();
         }
+
+        if(rj == null){
+            getLogger().warning("调用机器人失败！(调用返回不是合法Json)");
+            sendMsgToOnlinePlayer("[错误] 机器人调用失败！");
+            return;
+        }
+
         //前缀设置
         String rs = cfg.getProperty("Robot.Name","").equalsIgnoreCase("") ? "" : cfg.getProperty("Robot.Name") + ":";
         getLogger().info("[调试] " + "机器人回复前缀：" + rs);
-        //防止空指针的检查代码
-        if(rj == null){
-            getLogger().warning("调用机器人失败！");
-            return;
-        }
+
         //根据code设置返回值
         int code = rj.get("code").getAsInt();
         if (code == TulingRobot.TLCode.Text) {
@@ -412,6 +363,7 @@ public class PluginMain extends JavaPlugin implements Listener {
             rs = rs + "[错误]" + TLR.getErrorString(code) + "(" + code + ")";
             getLogger().warning("[错误]" + TLR.getErrorString(code) + "(" + code + ")");
         }
+
         getLogger().info("[调试] " + "最终消息：" + rs);
         getLogger().info("[调试] " + "开始发送公屏信息");
         //发送公屏信息

@@ -16,6 +16,7 @@
  */
 package net.coding.lamgc.TulingRobot;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import wzh.http.HttpRequest;
@@ -78,7 +79,12 @@ public class TulingRobot {
         String re = HttpRequest.sendPost(getApiUrl(true),new String(sj.toString().getBytes("UTF-8")),"application/json");
         System.out.println("[调试] JsonString:" + re);
         //TODO:2017/09/10 - 这里可能会获取到空文本，导致生成JsonObject对象失败
-        return new JsonParser().parse(re).getAsJsonObject();
+        JsonElement rp = new JsonParser().parse(re);
+        //如果不是JsonObject
+        //返回Null
+        if(!rp.isJsonObject()){return null;}
+        //正常就返回JsonObject对象
+        return rp.getAsJsonObject();
     }
 
     /**

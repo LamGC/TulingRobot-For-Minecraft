@@ -79,7 +79,7 @@ public class HttpRequest {
     public static String sendPost(String url, String param,String ContentType) {
         PrintWriter out = null;
         BufferedReader in = null;
-        String result = "";
+        StringBuilder result = new StringBuilder();
         try {
             URL realUrl = new URL(url);
             // 打开和URL之间的连接
@@ -107,7 +107,7 @@ public class HttpRequest {
                     new InputStreamReader(conn.getInputStream(),"UTF-8"));
             String line;
             while ((line = in.readLine()) != null) {
-                result += line;
+                result.append(line).append("\n");
             }
         } catch (Exception e) {
             //System.out.println("发送 POST 请求出现异常！"+e);
@@ -127,6 +127,6 @@ public class HttpRequest {
                 ex.printStackTrace();
             }
         }
-        return result;
+        return result.toString();
     }
 }
