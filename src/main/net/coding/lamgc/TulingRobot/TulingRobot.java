@@ -30,12 +30,15 @@ import java.io.UnsupportedEncodingException;
 public class TulingRobot {
 
     private String ApiKey;
+    public final String ApiV1_Url = "http://www.tuling123.com/openapi/api";
+    public final String ApiV2_Url = "http://openapi.tuling123.com/openapi/api/v2";
 
     public TulingRobot(){}
 
     /**
      * 置Key - 构造方法
      * @param ApiKey Api调用Key
+     * @apiNote 创建一个图灵机器人类对象
      */
     public TulingRobot(String ApiKey){
         SetApiKey(ApiKey);
@@ -52,6 +55,7 @@ public class TulingRobot {
 
     /**
      * 取图灵机器人Api地址
+     * @deprecated 现在可直接通过类变量获得Api调用地址
      * @param NoApiV2 是否不使用ApiV2
      * @return 地址
      */
@@ -64,25 +68,31 @@ public class TulingRobot {
     }
 
     /**
-     * 使用机器人（Api_V1）
+     * 使用机器人（Api_V1）<br/>
+     * 如果你不知道JsonObject类在哪里，{@link JsonObject} 就是你所需要的了
      * @param msg 消息
      * @param UserID 用户标识，用于上下文答复
      * @return 返回HashMap对象
      *          请注意检查HashMap，以免造成因无对应值导致的错误
      */
     public JsonObject Robot(String msg, String UserID) throws UnsupportedEncodingException {
+        //创建JsonObject参数类
         JsonObject sj = new JsonObject();
+        //置入参数
         sj.addProperty("key", ApiKey);
         sj.addProperty("info",msg);
         sj.addProperty("userid",UserID);
+        //下面是Http Get代码，已弃用
         //String re = HttpRequest.sendGet(getApiUrl(true),"key=" + ApiKey + "&info=" + URLEncoder.encode(msg,"UTF-8") + "&userid=" + URLEncoder.encode(UserID,"UTF-8"));
-        String re = HttpRequest.sendPost(getApiUrl(true),new String(sj.toString().getBytes("UTF-8")),"application/json");
+        //TODO:2017/09/15 - 这里会导致Http 500，需要检查一下原因
+        String re = HttpRequest.sendPost(ApiV1_Url,new String(sj.toString().getBytes("UTF-8")),"application/json");
+        //输出JsonString以检查是否正确
         System.out.println("[调试] JsonString:" + re);
         //TODO:2017/09/10 - 这里可能会获取到空文本，导致生成JsonObject对象失败
         JsonElement rp = new JsonParser().parse(re);
         //如果不是JsonObject
         //返回Null
-        if(!rp.isJsonObject()){return null;}
+        if(!rp.isJsonObject()){ return null; }
         //正常就返回JsonObject对象
         return rp.getAsJsonObject();
     }
@@ -133,24 +143,5 @@ public class TulingRobot {
         final static int Error_RTHBU = 40003;
         //数据格式异常
         final static int Error_DataFormatException = 40007;
-    }
-
-    /**
-     * Json对象
-     */
-    public static class TLJsonObject{
-        /**
-         * V1信息
-         */
-        public static class V1Info{
-            String key;
-            String info;
-            String userid;
-            public V1Info(String Key,String Info,String UserID){
-                this.key = Key;
-                this.info = Info;
-                this.userid = UserID;
-            }
-        }
     }
 }
