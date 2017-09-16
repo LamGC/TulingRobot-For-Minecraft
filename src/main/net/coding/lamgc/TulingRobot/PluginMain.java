@@ -17,6 +17,7 @@
 package net.coding.lamgc.TulingRobot;
 
 import com.google.gson.JsonObject;
+import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -35,13 +36,19 @@ import java.util.Properties;
  * 插件及程序的主类
  * @author LamGC
  */
+@SuppressWarnings("SpellCheckingInspection")
 public class PluginMain extends JavaPlugin implements Listener {
+
+    //插件相关信息？
+    private final String Plugin_Version = "1.1.2";
+
 
     //图灵机器人实例
     private static TulingRobot TLR = new TulingRobot();
     private Properties cfg = new Properties();
     private boolean Config_Modified = false;
 
+    @SuppressWarnings("SpellCheckingInspection")
     public static void main(String[] args) throws UnsupportedEncodingException {
         System.out.println("请把本Jar文件放入服务器目录下plugins文件夹即可");
         /*
@@ -81,13 +88,16 @@ public class PluginMain extends JavaPlugin implements Listener {
      */
     private boolean LoadApiKey_New(){
         String Key = cfg.getProperty("Robot.ApiKey","");
+        getLogger().info("[调试] ApiKey:" + Key);
         if(Key.equalsIgnoreCase("")){
             getLogger().warning("ApiKey文件为空，请填入ApiKey！");
         }else if(Key.length() != 32){
+            //长度不对
             getLogger().warning("不是一个标准的ApiKey！");
             return false;
         }
         TLR.SetApiKey(Key);
+        getLogger().info("ApiKey已成功载入");
         return true;
     }
 
@@ -96,8 +106,11 @@ public class PluginMain extends JavaPlugin implements Listener {
      * @return 返回是否载入成功
      */
     private boolean LoadConfig() throws IOException {
+        //获得插件数据文件夹
         File df = getDataFolder();
+        //检查文件夹是否存在，或是否为文件
         if(!df.exists() || df.isFile()){
+            //是就删除，然后重新创建
             df.delete();
             if(!df.mkdir()){
                 getLogger().warning("插件数据文件夹创建失败！请手动创建【TulingRobot】文件夹");
@@ -144,7 +157,7 @@ public class PluginMain extends JavaPlugin implements Listener {
     }
 
     private void SaveConfig() throws IOException {
-        cfg.store(new FileOutputStream(new File(getDataFolder().getPath() + "/config.properties")),"TulingRobot - Config");
+        cfg.store(new FileOutputStream(new File(getDataFolder().getPath() + "/config.properties")),"TulingRobot_V" + Plugin_Version + " - ConfigFile");
     }
 
     /**
@@ -200,13 +213,15 @@ public class PluginMain extends JavaPlugin implements Listener {
      * @return 是否完成处理
      */
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+        //TODO:2017/09/15: 注意清理 [调试] 代码
         //如果是调用机器人的命令
         if (cmd.getName().equalsIgnoreCase("robot") && args.length == 1) {
             JsonObject rem;
             try {
                 rem = TLR.Robot(args[0], sender.getName());
-            } catch (UnsupportedEncodingException e) {
+            } catch (IOException e) {
                 sender.sendMessage("调用机器人时发生一个异常！详细信息请查看服务器控制台。");
+                getLogger().warning("调用机器人时发生了异常，信息如下:");
                 e.printStackTrace();
                 return true;
             }
@@ -252,7 +267,7 @@ public class PluginMain extends JavaPlugin implements Listener {
                         }
                         return true;
                     } catch (IOException e) {
-                        sender.sendMessage("执行操作时发生了一个异常！详细信息请查看服务器控制台！");
+                        sender.sendMessage("执行操作时发生了一个异常！详细信息请查看服务器控制台。");
                         getLogger().warning("发送了一个严重的问题：");
                         e.printStackTrace();
                         return true;
@@ -299,6 +314,7 @@ public class PluginMain extends JavaPlugin implements Listener {
      */
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerCharEvent(AsyncPlayerChatEvent event) {
+        //TODO:2017/09/15: 注意清理 调试 代码
         getLogger().info("[调试] " + "玩家聊天事件被触发");
         if(event.isCancelled()){
             //如果事件被取消，则放弃处理，防止浪费调用次数
@@ -316,73 +332,79 @@ public class PluginMain extends JavaPlugin implements Listener {
             getLogger().info("[调试] " + "聊天对话模式被关闭，放弃处理");
             return;
         }
+        //异步处理方法
+        new Thread(() -> {
+            getLogger().info("[调试] 处理线程已启动，开始异步处理...");
+            //前缀，如果需要
+            //前缀如果不为空
+            String prefix = cfg.getProperty("Dialogue.Trigger_Prefix");
+            if(!prefix.equalsIgnoreCase("")){
+                getLogger().info("[调试] " + "前缀在信息的位置：" + event.getMessage().indexOf(prefix));
+                //如果发现了前缀(在开头)
+                if(event.getMessage().indexOf(prefix) != 0){
+                    //不处理非指定前缀消息
+                    getLogger().info("[调试] " + "前缀不正确，放弃处理");
+                    return;
+                }
+            }
 
-        //前缀，如果需要
-        //前缀如果不为空
-        String prefix = cfg.getProperty("Dialogue.Trigger_Prefix");
-        if(!prefix.equalsIgnoreCase("")){
-            getLogger().info("[调试] " + "前缀在信息的位置：" + event.getMessage().indexOf(prefix));
-            if(event.getMessage().indexOf(prefix) != 0){
-                //不处理非指定前缀消息
-                getLogger().info("[调试] " + "前缀不正确，放弃处理");
+            //准备好一个JsonObject变量用来获取机器人返回值
+            JsonObject rj;
+            try {
+                //调用机器人
+                getLogger().info("[调试] " + "调用机器人...");
+                rj = TLR.Robot(event.getMessage(), event.getPlayer().getName());
+                getLogger().info("[调试] " + "调用完毕，开始处理");
+            } catch (IOException e) {
+                Bukkit.broadcastMessage("执行操作时发生了一个异常！详细信息请查看服务器控制台。");
+                getLogger().warning("调用机器人时发生了异常，信息如下:");
+                e.printStackTrace();
                 return;
             }
-        }
 
-        //准备好一个JsonObject变量用来获取机器人返回值
-        JsonObject rj = null;
-        try {
-            //调用机器人
-            getLogger().info("[调试] " + "调用机器人...");
-            rj = TLR.Robot(event.getMessage(), event.getPlayer().getName());
-            getLogger().info("[调试] " + "调用完毕，开始处理");
-        } catch (UnsupportedEncodingException e) {
-            getLogger().warning("消息处理失败！编码转换错误：");
-            e.printStackTrace();
-        }
+            if(rj == null){
+                getLogger().warning("调用机器人失败！(调用返回不是合法Json)");
+                //sendMsgToOnlinePlayers("[错误] 机器人调用失败！");
+                Bukkit.broadcastMessage("[错误] 机器人调用失败！");
+                return;
+            }
 
-        if(rj == null){
-            getLogger().warning("调用机器人失败！(调用返回不是合法Json)");
-            sendMsgToOnlinePlayer("[错误] 机器人调用失败！");
-            return;
-        }
+            //前缀设置
+            String rs = cfg.getProperty("Robot.Name","").equalsIgnoreCase("") ? "" : cfg.getProperty("Robot.Name") + ":";
+            getLogger().info("[调试] " + "机器人回复前缀：" + rs);
 
-        //前缀设置
-        String rs = cfg.getProperty("Robot.Name","").equalsIgnoreCase("") ? "" : cfg.getProperty("Robot.Name") + ":";
-        getLogger().info("[调试] " + "机器人回复前缀：" + rs);
+            //根据code设置返回值
+            int code = rj.get("code").getAsInt();
+            if (code == TulingRobot.TLCode.Text) {
+                rs = rs + rj.get("text").getAsString();
+            } else if (code == TulingRobot.TLCode.Url) {
+                rs = rs + rj.get("text") + "(Url:" + rj.get("url") + ")";
+            } else if (code >= TulingRobot.TLCode.News && code <= TulingRobot.TLCode.children_Poetry) {
+                rs = rs + "[插件]本功能咱不支持";
+            } else if (code >= TulingRobot.TLCode.Error_KeyError) {
+                rs = rs + "[错误]" + TLR.getErrorString(code) + "(" + code + ")";
+                getLogger().warning("[错误]" + TLR.getErrorString(code) + "(" + code + ")");
+            }
 
-        //根据code设置返回值
-        int code = rj.get("code").getAsInt();
-        if (code == TulingRobot.TLCode.Text) {
-            rs = rs + rj.get("text").getAsString();
-        } else if (code == TulingRobot.TLCode.Url) {
-            rs = rs + rj.get("text") + "(Url:" + rj.get("url") + ")";
-        } else if (code >= TulingRobot.TLCode.News && code <= TulingRobot.TLCode.children_Poetry) {
-            rs = rs + "[插件]本功能咱不支持";
-        } else if (code >= TulingRobot.TLCode.Error_KeyError) {
-            rs = rs + "[错误]" + TLR.getErrorString(code) + "(" + code + ")";
-            getLogger().warning("[错误]" + TLR.getErrorString(code) + "(" + code + ")");
-        }
-
-        getLogger().info("[调试] " + "最终消息：" + rs);
-        getLogger().info("[调试] " + "开始发送公屏信息");
-        //发送公屏信息
-        sendMsgToOnlinePlayer(rs);
+            getLogger().info("[调试] " + "最终消息：" + rs);
+            getLogger().info("[调试] " + "开始发送公屏信息");
+            //发送公屏信息
+            Bukkit.broadcastMessage(rs);
+        }).start();
     }
 
     /**
      * 发送公屏信息<br/>
      * 其实是发给所有玩家一条消息而已233
+     * @deprecated 发现Bukkit自带的Api了- -{@link Bukkit}
      * @param Msg 信息
      */
-    private void sendMsgToOnlinePlayer(String Msg){
+    private void sendMsgToOnlinePlayers(String Msg){
         //获取在线玩家
         Collection<? extends Player> onlinePlayers = getServer().getOnlinePlayers();
         //初始化Player数组
-        Player[] op = new Player[onlinePlayers.size()];
-        //emmmm，这里好像有问题啊
-        Player[] players = onlinePlayers.toArray(op);
-        for (Player player : players) {
+        //Player[] op = new Player[onlinePlayers.size()];
+        for (Player player : onlinePlayers.toArray(new Player[onlinePlayers.size()])) {
             //发送信息
             player.sendMessage(Msg);
         }

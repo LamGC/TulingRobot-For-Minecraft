@@ -21,7 +21,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import wzh.http.HttpRequest;
 
-import java.io.UnsupportedEncodingException;
+import java.io.IOException;
 
 /**
  * 图灵机器人Api
@@ -69,26 +69,33 @@ public class TulingRobot {
 
     /**
      * 使用机器人（Api_V1）<br/>
-     * 如果你不知道JsonObject类在哪里，{@link JsonObject} 就是你所需要的了
-     * @param msg 消息
+     * 如果你不知道JsonObject类在哪里，{@link JsonObject} 就是了
+     * @param msg 对话消息
      * @param UserID 用户标识，用于上下文答复
      * @return 返回HashMap对象
      *          请注意检查HashMap，以免造成因无对应值导致的错误
      */
-    public JsonObject Robot(String msg, String UserID) throws UnsupportedEncodingException {
+    public JsonObject Robot(String msg, String UserID) throws IOException {
         //创建JsonObject参数类
         JsonObject sj = new JsonObject();
-        //置入参数
+        //加入参数
         sj.addProperty("key", ApiKey);
         sj.addProperty("info",msg);
         sj.addProperty("userid",UserID);
         //下面是Http Get代码，已弃用
-        //String re = HttpRequest.sendGet(getApiUrl(true),"key=" + ApiKey + "&info=" + URLEncoder.encode(msg,"UTF-8") + "&userid=" + URLEncoder.encode(UserID,"UTF-8"));
-        //TODO:2017/09/15 - 这里会导致Http 500，需要检查一下原因
-        String re = HttpRequest.sendPost(ApiV1_Url,new String(sj.toString().getBytes("UTF-8")),"application/json");
+        //Post爆炸，先用Get做测试
+        String ss = "key=" + ApiKey + "&info=" + msg + "&userid=" + UserID;
+        System.out.println("[调试] 参数:" + ss);
+        String re = HttpRequest.sendGet(ApiV1_Url,new String(ss.getBytes(),"UTF-8"));
+        //TODO:2017/09/15: 这里会导致Http 500，需要检查一下原因
+        /*String re = HttpRequest.sendPost(
+                ApiV1_Url,
+                new String(sj.toString().getBytes("UTF-8")),
+                "application/json"
+        );*/
         //输出JsonString以检查是否正确
         System.out.println("[调试] JsonString:" + re);
-        //TODO:2017/09/10 - 这里可能会获取到空文本，导致生成JsonObject对象失败
+        //TODO:2017/09/10: 这里可能会获取到空文本，导致生成JsonObject对象失败
         JsonElement rp = new JsonParser().parse(re);
         //如果不是JsonObject
         //返回Null
