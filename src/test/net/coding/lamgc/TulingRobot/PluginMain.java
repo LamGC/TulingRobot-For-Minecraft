@@ -14,10 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
  */
-package TulingRobot;
+package net.coding.lamgc.TulingRobot;
 
 import com.google.gson.JsonObject;
-import net.coding.lamgc.TulingRobot.TulingRobot;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -42,7 +41,7 @@ public class PluginMain extends JavaPlugin implements Listener {
 
 
     //图灵机器人实例
-    private static TulingRobot.TulingRobot.TulingRobot TLR = new TulingRobot.TulingRobot.TulingRobot();
+    private static TulingRobot TLR = new TulingRobot();
     //配置项
     private Properties cfg = new Properties();
     //配置是否出现修改
@@ -237,13 +236,13 @@ public class PluginMain extends JavaPlugin implements Listener {
                 return true;
             }
             int code = rem.get("code").getAsInt();
-            if (code == TulingRobot.TulingRobot.TulingRobot.TLCode.Text) {
+            if (code == TulingRobot.TLCode.Text) {
                 sender.sendMessage(rem.get("text").getAsString());
-            } else if (code == TulingRobot.TulingRobot.TulingRobot.TLCode.Url) {
+            } else if (code == TulingRobot.TLCode.Url) {
                 sender.sendMessage(rem.get("text") + "(Url:" + rem.get("url") + ")");
-            } else if (code >= TulingRobot.TulingRobot.TulingRobot.TLCode.News && code <= TulingRobot.TulingRobot.TulingRobot.TLCode.children_Poetry) {
+            } else if (code >= TulingRobot.TLCode.News && code <= TulingRobot.TLCode.children_Poetry) {
                 sender.sendMessage("[插件]本功能咱不支持");
-            } else if (code >= TulingRobot.TulingRobot.TulingRobot.TLCode.Error_KeyError) {
+            } else if (code >= TulingRobot.TLCode.Error_KeyError) {
                 sender.sendMessage("[错误]" + TLR.getErrorString(code) + "(" + code + ")");
                 getLogger().warning("[错误]" + TLR.getErrorString(code) + "(" + code + ")");
             }
@@ -381,13 +380,13 @@ public class PluginMain extends JavaPlugin implements Listener {
 
             //根据code设置返回值
             int code = rj.get("code").getAsInt();
-            if (code == TulingRobot.TulingRobot.TulingRobot.TLCode.Text) {
+            if (code == TulingRobot.TLCode.Text) {
                 rs = rs + rj.get("text").getAsString();
-            } else if (code == TulingRobot.TulingRobot.TulingRobot.TLCode.Url) {
+            } else if (code == TulingRobot.TLCode.Url) {
                 rs = rs + rj.get("text") + "(Url:" + rj.get("url") + ")";
-            } else if (code >= TulingRobot.TulingRobot.TulingRobot.TLCode.News && code <= TulingRobot.TulingRobot.TulingRobot.TLCode.children_Poetry) {
+            } else if (code >= TulingRobot.TLCode.News && code <= TulingRobot.TLCode.children_Poetry) {
                 rs = rs + "[插件]本功能咱不支持";
-            } else if (code >= TulingRobot.TulingRobot.TulingRobot.TLCode.Error_KeyError) {
+            } else if (code >= TulingRobot.TLCode.Error_KeyError) {
                 rs = rs + "[错误]" + TLR.getErrorString(code) + "(" + code + ")";
                 getLogger().warning("[错误]" + TLR.getErrorString(code) + "(" + code + ")");
             }

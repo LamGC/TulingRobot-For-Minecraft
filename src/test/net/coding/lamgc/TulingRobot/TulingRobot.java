@@ -14,12 +14,12 @@
  You should have received a copy of the GNU General Public License
  along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
  */
-package TulingRobot;
+package net.coding.lamgc.TulingRobot;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import http.HttpRequest;
+import wzh.http.HttpRequest;
 
 import java.io.IOException;
 
@@ -140,7 +140,7 @@ public class TulingRobot {
         //儿童版 儿歌类返回
         final static int children_Song = 313000;
         //儿童版 诗词类返回
-        final static int children_Poetry = 314000;
+        public final static int children_Poetry = 314000;
 
         // Key错误
         final static int Error_KeyError = 40001;
