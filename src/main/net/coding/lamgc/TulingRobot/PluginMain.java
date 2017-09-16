@@ -34,7 +34,6 @@ import java.util.Properties;
  * 插件及程序的主类
  * @author LamGC
  */
-@SuppressWarnings("SpellCheckingInspection")
 public class PluginMain extends JavaPlugin implements Listener {
 
     //插件相关信息？
@@ -48,7 +47,7 @@ public class PluginMain extends JavaPlugin implements Listener {
     //配置是否出现修改
     private boolean Config_Modified = false;
 
-    @SuppressWarnings("SpellCheckingInspection")
+
     public static void main(String[] args) throws UnsupportedEncodingException {
         System.out.println("请把本Jar文件放入服务器目录下plugins文件夹即可");
         /*
