@@ -20,7 +20,6 @@ import com.google.gson.JsonObject;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.HandlerList;
@@ -29,7 +28,6 @@ import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.*;
-import java.util.Collection;
 import java.util.Properties;
 
 /**
@@ -45,7 +43,9 @@ public class PluginMain extends JavaPlugin implements Listener {
 
     //图灵机器人实例
     private static TulingRobot TLR = new TulingRobot();
+    //配置项
     private Properties cfg = new Properties();
+    //配置是否出现修改
     private boolean Config_Modified = false;
 
     @SuppressWarnings("SpellCheckingInspection")
@@ -79,7 +79,7 @@ public class PluginMain extends JavaPlugin implements Listener {
             getLogger().warning("载入配置时发生异常：");
             e.printStackTrace();
         }
-        getLogger().info("插件已就绪");
+        getLogger().info("插件已就绪(Version:V" + Plugin_Version);
     }
 
     /**
@@ -141,9 +141,13 @@ public class PluginMain extends JavaPlugin implements Listener {
             byte[] b = new byte[config.available()];
             if(config.read(b) == config.available()){
                 FileOutputStream fos = new FileOutputStream(configFile);
+                //写入文件
                 fos.write(b);
+                //刷新缓冲区
                 fos.flush();
+                //关闭输出流
                 fos.close();
+                //读入配置
                 cfg.load(new InputStreamReader(new FileInputStream(configFile),"UTF-8"));
                 getLogger().warning("config.properties文件不存在，插件已自动创建，进行设置后使用【/setRobot reload】重载配置");
                 return false;
@@ -166,12 +170,14 @@ public class PluginMain extends JavaPlugin implements Listener {
      * @throws IOException 写入文件时可能发生的异常
      */
     private void SetApiKey(String ApiKey) throws IOException {
-        /*//获取文件File对象
+        /*
+        //获取文件File对象
         File KeyFile = new File(getDataFolder().getPath() + "/ApiKey.txt");
         FileOutputStream fos = new FileOutputStream(KeyFile);
         fos.write(ApiKey.getBytes("UTF-8"));
         fos.flush();
-        fos.close();*/
+        fos.close();
+        */
 
         //新方法
         cfg.put("Robot.ApiKey",ApiKey);
@@ -391,22 +397,5 @@ public class PluginMain extends JavaPlugin implements Listener {
             //发送公屏信息
             Bukkit.broadcastMessage(rs);
         }).start();
-    }
-
-    /**
-     * 发送公屏信息<br/>
-     * 其实是发给所有玩家一条消息而已233
-     * @deprecated 发现Bukkit自带的Api了- -{@link Bukkit}
-     * @param Msg 信息
-     */
-    private void sendMsgToOnlinePlayers(String Msg){
-        //获取在线玩家
-        Collection<? extends Player> onlinePlayers = getServer().getOnlinePlayers();
-        //初始化Player数组
-        //Player[] op = new Player[onlinePlayers.size()];
-        for (Player player : onlinePlayers.toArray(new Player[onlinePlayers.size()])) {
-            //发送信息
-            player.sendMessage(Msg);
-        }
     }
 }
