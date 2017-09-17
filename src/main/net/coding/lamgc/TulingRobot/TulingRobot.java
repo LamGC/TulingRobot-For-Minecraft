@@ -84,15 +84,15 @@ public class TulingRobot {
         sj.addProperty("userid",UserID);
         //下面是Http Get代码，已弃用
         //Post爆炸，先用Get做测试
-        String ss = "key=" + ApiKey + "&info=" + msg + "&userid=" + UserID;
-        System.out.println("[调试] 参数:" + ss);
-        String re = HttpRequest.sendGet(ApiV1_Url,new String(ss.getBytes(),"UTF-8"));
+        //String ss = "key=" + ApiKey + "&info=" + msg + "&userid=" + UserID;
+        //System.out.println("[调试] 参数:" + ss);
+        //String re = HttpRequest.sendGet(ApiV1_Url,new String(ss.getBytes(),"UTF-8"));
         //TODO:2017/09/15: 这里会导致Http 500，需要检查一下原因
-        /*String re = HttpRequest.sendPost(
+        String re = HttpRequest.sendPost(
                 ApiV1_Url,
                 new String(sj.toString().getBytes("UTF-8")),
                 "application/json"
-        );*/
+        );
         //输出JsonString以检查是否正确
         System.out.println("[调试] JsonString:" + re);
         //TODO:2017/09/10: 这里可能会获取到空文本，导致生成JsonObject对象失败

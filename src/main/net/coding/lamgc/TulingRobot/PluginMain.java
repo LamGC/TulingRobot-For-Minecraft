@@ -73,7 +73,13 @@ public class PluginMain extends JavaPlugin implements Listener {
     public void onLoad() {
         getLogger().info("插件载入中...");
         try {
-            LoadConfig();
+            if(LoadConfig()) {
+                if (!LoadApiKey_New()) {
+                    getLogger().warning("ApiKey载入失败！");
+                }
+            }else{
+                getLogger().warning("配置载入失败！");
+            }
         } catch (IOException e) {
             getLogger().warning("载入配置时发生异常：");
             e.printStackTrace();
@@ -152,10 +158,6 @@ public class PluginMain extends JavaPlugin implements Listener {
                 return false;
             }
         }
-        if(!LoadApiKey_New()){
-            getLogger().warning("ApiKey重载失败");
-            return false;
-        }
         return false;
     }
 
@@ -180,6 +182,7 @@ public class PluginMain extends JavaPlugin implements Listener {
 
         //新方法
         cfg.put("Robot.ApiKey",ApiKey);
+        getLogger().info("机器人ApiKey已修改(New_Key: " + ApiKey + ")");
         Config_Modified = true;
     }
 
@@ -319,7 +322,7 @@ public class PluginMain extends JavaPlugin implements Listener {
      */
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerCharEvent(AsyncPlayerChatEvent event) {
-        //TODO:2017/09/15: 注意清理 调试 代码
+        //TODO:2017/09/15: 注意清理 [调试] 代码
         getLogger().info("[调试] " + "玩家聊天事件被触发");
         if(event.isCancelled()){
             //如果事件被取消，则放弃处理，防止浪费调用次数
@@ -343,6 +346,7 @@ public class PluginMain extends JavaPlugin implements Listener {
             //前缀，如果需要
             //前缀如果不为空
             String prefix = cfg.getProperty("Dialogue.Trigger_Prefix");
+            getLogger().info("[调试] 触发前缀: " + prefix);
             if(!prefix.equalsIgnoreCase("")){
                 getLogger().info("[调试] " + "前缀在信息的位置：" + event.getMessage().indexOf(prefix));
                 //如果发现了前缀(在开头)
@@ -358,7 +362,8 @@ public class PluginMain extends JavaPlugin implements Listener {
             try {
                 //调用机器人
                 getLogger().info("[调试] " + "调用机器人...");
-                rj = TLR.Robot(event.getMessage(), event.getPlayer().getName());
+                //清除前缀信息
+                rj = TLR.Robot(event.getMessage().replace(prefix,""), event.getPlayer().getName());
                 getLogger().info("[调试] " + "调用完毕，开始处理");
             } catch (IOException e) {
                 Bukkit.broadcastMessage("执行操作时发生了一个异常！详细信息请查看服务器控制台。");
@@ -375,7 +380,8 @@ public class PluginMain extends JavaPlugin implements Listener {
             }
 
             //前缀设置
-            String rs = cfg.getProperty("Robot.Name","").equalsIgnoreCase("") ? "" : cfg.getProperty("Robot.Name") + ":";
+            //测试发现有点别扭，所以加个空格- -
+            String rs = cfg.getProperty("Robot.Name","").equalsIgnoreCase("") ? "" : cfg.getProperty("Robot.Name") + ": ";
             getLogger().info("[调试] " + "机器人回复前缀：" + rs);
 
             //根据code设置返回值
@@ -383,7 +389,7 @@ public class PluginMain extends JavaPlugin implements Listener {
             if (code == TulingRobot.TLCode.Text) {
                 rs = rs + rj.get("text").getAsString();
             } else if (code == TulingRobot.TLCode.Url) {
-                rs = rs + rj.get("text") + "(Url:" + rj.get("url") + ")";
+                rs = rs + rj.get("text").getAsString() + "(Url: " + rj.get("url").getAsString() + " )";
             } else if (code >= TulingRobot.TLCode.News && code <= TulingRobot.TLCode.children_Poetry) {
                 rs = rs + "[插件]本功能咱不支持";
             } else if (code >= TulingRobot.TLCode.Error_KeyError) {

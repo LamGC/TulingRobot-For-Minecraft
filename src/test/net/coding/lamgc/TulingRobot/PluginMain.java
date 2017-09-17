@@ -48,23 +48,16 @@ public class PluginMain extends JavaPlugin implements Listener {
     private boolean Config_Modified = false;
 
 
-    public static void main(String[] args) throws UnsupportedEncodingException {
-        System.out.println("请把本Jar文件放入服务器目录下plugins文件夹即可");
-        /*
-        JsonObject sj = new JsonObject();
-        sj.addProperty("key", "6dffba1e83cdb5d7aebc8ad6b320cf5b");
-        sj.addProperty("info","Test");
-        sj.addProperty("userid","TUD");
-        System.out.println(HttpRequest.sendPost(TLR.getApiUrl(true),sj.toString()));
-        */
+    public static void main(String[] args){
+        try {
+            TLR.Robot("233","test");
+        } catch (IOException e) {
+            System.out.println("测试时发生异常，信息如下：");
+            e.printStackTrace();
+            System.exit(1);
+        }
 
-        //JsonObject rj = TLR.Robot("看新闻","Tud");
-        /*
-        System.out.println(rj.toString());
-        System.out.println(rj.get("code").getAsInt());
-        System.out.println(rj.get("text").getAsString());
-        System.out.println(rj.get("url").getAsString());
-        */
+
     }
 
     /**
@@ -91,7 +84,7 @@ public class PluginMain extends JavaPlugin implements Listener {
         if(Key.equalsIgnoreCase("")){
             getLogger().warning("ApiKey文件为空，请填入ApiKey！");
         }else if(Key.length() != 32){
-            //长度不对
+            //长度不
             getLogger().warning("不是一个标准的ApiKey！");
             return false;
         }
@@ -112,7 +105,7 @@ public class PluginMain extends JavaPlugin implements Listener {
             //是就删除，然后重新创建
             df.delete();
             if(!df.mkdir()){
-                getLogger().warning("插件数据文件夹创建失败！请手动创建【TulingRobot】文件夹");
+                getLogger().warning("插件数据文件夹创建失败！请手动在【plugins】目录创建【TulingRobot】目录");
                 return false;
             }
         }
@@ -319,7 +312,7 @@ public class PluginMain extends JavaPlugin implements Listener {
      */
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerCharEvent(AsyncPlayerChatEvent event) {
-        //TODO:2017/09/15: 注意清理 调试 代码
+        //TODO:2017/09/15: 注意清理 [调试] 代码
         getLogger().info("[调试] " + "玩家聊天事件被触发");
         if(event.isCancelled()){
             //如果事件被取消，则放弃处理，防止浪费调用次数
