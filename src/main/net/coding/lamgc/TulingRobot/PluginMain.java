@@ -284,6 +284,13 @@ public class PluginMain extends JavaPlugin implements Listener {
                     }
                 }
             }else
+                //TODO:2017/09/18: 新设置代码块，明天再写
+
+
+
+
+
+
                 //或者重载Key
                 //以后会重载配置
                 if(args.length == 1 && args[0].equalsIgnoreCase("reload")){
