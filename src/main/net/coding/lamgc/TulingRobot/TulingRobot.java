@@ -87,7 +87,6 @@ public class TulingRobot {
         //String ss = "key=" + ApiKey + "&info=" + msg + "&userid=" + UserID;
         //System.out.println("[调试] 参数:" + ss);
         //String re = HttpRequest.sendGet(ApiV1_Url,new String(ss.getBytes(),"UTF-8"));
-        //TODO:2017/09/15: 这里会导致Http 500，需要检查一下原因
         String re = HttpRequest.sendPost(
                 ApiV1_Url,
                 new String(sj.toString().getBytes("UTF-8")),
@@ -95,7 +94,6 @@ public class TulingRobot {
         );
         //输出JsonString以检查是否正确
         System.out.println("[调试] JsonString:" + re);
-        //TODO:2017/09/10: 这里可能会获取到空文本，导致生成JsonObject对象失败
         JsonElement rp = new JsonParser().parse(re);
         //如果不是JsonObject
         //返回Null

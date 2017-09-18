@@ -17,6 +17,7 @@
 package net.coding.lamgc.TulingRobot;
 
 import com.google.gson.JsonObject;
+import com.sun.xml.internal.bind.v2.TODO;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -253,6 +254,7 @@ public class PluginMain extends JavaPlugin implements Listener {
         }else
             //------------------------------机器人设置命令------------------------------
             if(cmd.getName().equalsIgnoreCase("setrobot")){
+            //TODO:2017/09/18: 添加【前缀，机器人名，自由聊天开关】设置命令
             //两个参数，则为修改ApiKey而不重载
             if(args[0].equalsIgnoreCase("setkey") && args.length == 2 || args.length == 3){
                 //标准图灵机器人ApiKey是32位长度的
