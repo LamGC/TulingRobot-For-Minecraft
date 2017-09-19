@@ -44,8 +44,6 @@ public class PluginMain extends JavaPlugin implements Listener {
     private static TulingRobot TLR = new TulingRobot();
     //配置项
     private Properties cfg = new Properties();
-    //配置是否出现修改
-    private boolean Config_Modified = false;
 
 
     public static void main(String[] args) throws UnsupportedEncodingException {
@@ -74,7 +72,7 @@ public class PluginMain extends JavaPlugin implements Listener {
         getLogger().info("插件载入中...");
         try {
             if(LoadConfig()) {
-                if (!LoadApiKey_New()) {
+                if (!LoadApiKey()) {
                     getLogger().warning("ApiKey载入失败！");
                 }
             }else{
@@ -151,7 +149,7 @@ public class PluginMain extends JavaPlugin implements Listener {
         }else
             //------------------------------机器人设置命令------------------------------
             if(cmd.getName().equalsIgnoreCase("setrobot")){
-            //TODO:2017/09/18: 添加【前缀，机器人名，自由聊天开关】设置命令
+            //TODO:2017/09/18: 添加【机器人名，自由聊天开关】设置命令
             //两个参数，则为修改ApiKey而不重载
             if(args[0].equalsIgnoreCase("setkey") && args.length == 2 || args.length == 3){
                 //标准图灵机器人ApiKey是32位长度的
@@ -180,7 +178,7 @@ public class PluginMain extends JavaPlugin implements Listener {
                         return true;
                     }
                 }
-            }else if(args.length  == 2 && args[0].equalsIgnoreCase("setprefix")){
+            }else if(args.length  == 2 && args[0].equalsIgnoreCase("prefix")){
                 try {
                     putConfig("Dialogue.Trigger_Prefix",args[1]);
                 } catch (IOException e) {
@@ -191,13 +189,28 @@ public class PluginMain extends JavaPlugin implements Listener {
                 }
                 sender.sendMessage("已成功修改聊天前缀！");
                 return true;
+            }else if(args.length == 2 && args[0].equalsIgnoreCase("robotname")){
+                    try {
+                        putConfig("Robot.Name",args[1]);
+                    } catch (IOException e) {
+                        sender.sendMessage("修改机器人名称时发生错误！详情请查看服务器控制台。");
+                        getLogger().warning("修改机器人名称时发生错误！信息如下：");
+                        e.printStackTrace();
+                        return true;
+                    }
+            }else if(args.length == 2 && args[0].equalsIgnoreCase("chattrigger")){
+                try {
+                    putConfig(
+                            "Dialogue.Chat_Trigger",
+                            args[1].equalsIgnoreCase("-r") ? "" : args[1]
+                    );
+                } catch (IOException e) {
+                    sender.sendMessage("修改设置时发生错误！详情请查看服务器控制台。");
+                    getLogger().warning("修改设置时发生错误！信息如下：");
+                    e.printStackTrace();
+                    return true;
+                }
             }else
-                //TODO:2017/09/19: 添加自由聊天开关命令和机器人名称修改命令
-
-
-
-
-
                 //或者重载Key
                 //以后会重载配置
                 if(args.length == 1 && args[0].equalsIgnoreCase("reload")){
@@ -220,10 +233,13 @@ public class PluginMain extends JavaPlugin implements Listener {
             }
             //帮助说明
             String u =
-                    "用法:/setrobot [选项] <参数...>" +
-                            "   选项:" +
-                            "setkey - 设置新的ApiKey【命令用法：/setrobot setkey {ApiKey} <--reload/-r>】" +
-                            "reload - 重载设置，目前仅重载ApiKey【命令用法：/setrobot reload】"
+                            "用法:/setrobot [选项] <参数...>" + "\n" +
+                            "    选项(支持全小写):" + "\n" +
+                            "        setkey       - 设置新的ApiKey【命令用法：/setrobot setkey {ApiKey} <--reload/-r>】" + "\n" +
+                            "        RobotName    - 设置新的机器人名称(自由聊天模式有效)" + "\n" +
+                            "        Prefix       - 设置自由聊天的前缀(设置为【-r】可删除前缀)" + "\n" +
+                            "        ChatTrigger  - 设置自由聊天模式开关，true为开启，false或其他字符为关闭" + "\n" +
+                            "        reload       - 重载设置，目前仅重载ApiKey【命令用法：/setrobot reload】" + "\n"
                     ;
 
             sender.sendMessage(u);
@@ -322,7 +338,7 @@ public class PluginMain extends JavaPlugin implements Listener {
      * 新的载入
      * @return ApiKey是否载入成功
      */
-    private boolean LoadApiKey_New(){
+    private boolean LoadApiKey(){
         String Key = cfg.getProperty("Robot.ApiKey","");
         getLogger().info("[调试] ApiKey:" + Key);
         if(Key.equalsIgnoreCase("")){
