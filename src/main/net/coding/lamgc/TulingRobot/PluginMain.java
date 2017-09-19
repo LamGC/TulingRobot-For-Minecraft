@@ -88,105 +88,6 @@ public class PluginMain extends JavaPlugin implements Listener {
     }
 
     /**
-     * 新的载入
-     * @return ApiKey是否载入成功
-     */
-    private boolean LoadApiKey_New(){
-        String Key = cfg.getProperty("Robot.ApiKey","");
-        getLogger().info("[调试] ApiKey:" + Key);
-        if(Key.equalsIgnoreCase("")){
-            getLogger().warning("ApiKey文件为空，请填入ApiKey！");
-        }else if(Key.length() != 32){
-            //长度不对
-            getLogger().warning("不是一个标准的ApiKey！");
-            return false;
-        }
-        TLR.SetApiKey(Key);
-        getLogger().info("ApiKey已成功载入");
-        return true;
-    }
-
-    /**
-     * 载入配置
-     * @return 返回是否载入成功
-     */
-    private boolean LoadConfig() throws IOException {
-        //获得插件数据文件夹
-        File df = getDataFolder();
-        //检查文件夹是否存在，或是否为文件
-        if(!df.exists() || df.isFile()){
-            //是就删除，然后重新创建
-            df.delete();
-            if(!df.mkdir()){
-                getLogger().warning("插件数据文件夹创建失败！请手动创建【TulingRobot】文件夹");
-                return false;
-            }
-        }
-        //指定配置文件路径获取File对象
-        File configFile = new File(getDataFolder().getPath() + "/config.properties");
-        //检查文件是否存在
-        if(configFile.exists()){
-            //确保 是一个文件
-            if(configFile.isFile()){
-                //载入配置
-                cfg.load(new InputStreamReader(new FileInputStream(configFile),"UTF-8"));
-                return true;
-            }else{
-                //不是，返回
-                getLogger().warning("config.properties不是文件！");
-                return false;
-            }
-        }else{
-            //没有文件，生成一个
-            InputStream config = this.getClass().getResourceAsStream("/config.properties");
-            if(config == null){
-                getLogger().warning("获取默认配置文件失败！请使用解压工具打开插件，解压【config.properties】文件到[plugins/TulingRobot]目录！");
-                return false;
-            }
-            byte[] b = new byte[config.available()];
-            if(config.read(b) == config.available()){
-                FileOutputStream fos = new FileOutputStream(configFile);
-                //写入文件
-                fos.write(b);
-                //刷新缓冲区
-                fos.flush();
-                //关闭输出流
-                fos.close();
-                //读入配置
-                cfg.load(new InputStreamReader(new FileInputStream(configFile),"UTF-8"));
-                getLogger().warning("config.properties文件不存在，插件已自动创建，进行设置后使用【/setRobot reload】重载配置");
-                return false;
-            }
-        }
-        return false;
-    }
-
-    private void SaveConfig() throws IOException {
-        cfg.store(new FileOutputStream(new File(getDataFolder().getPath() + "/config.properties")),"TulingRobot_V" + Plugin_Version + " - ConfigFile");
-    }
-
-    /**
-     * 置ApiKey到文件
-     * @param ApiKey 新的ApiKey\n
-     * @throws IOException 写入文件时可能发生的异常
-     */
-    private void SetApiKey(String ApiKey) throws IOException {
-        /*
-        //获取文件File对象
-        File KeyFile = new File(getDataFolder().getPath() + "/ApiKey.txt");
-        FileOutputStream fos = new FileOutputStream(KeyFile);
-        fos.write(ApiKey.getBytes("UTF-8"));
-        fos.flush();
-        fos.close();
-        */
-
-        //新方法
-        cfg.put("Robot.ApiKey",ApiKey);
-        getLogger().info("机器人ApiKey已修改(New_Key: " + ApiKey + ")");
-        Config_Modified = true;
-    }
-
-    /**
      * 插件已启用(插件载入完成)
      */
     public void onEnable() {
@@ -198,14 +99,11 @@ public class PluginMain extends JavaPlugin implements Listener {
      * 插件被停用(服务器关闭时)
      */
     public void onDisable() {
-        //保存配置
-        if(Config_Modified){
-            try {
-                SaveConfig();
-            } catch (IOException e) {
-                getLogger().warning("保存配置时发生异常：");
-                e.printStackTrace();
-            }
+        try {
+            SaveConfig();
+        } catch (IOException e) {
+            getLogger().warning("保存配置时发生异常：");
+            e.printStackTrace();
         }
         //停用插件时注销事件监听器
         HandlerList.unregisterAll((Listener) this);
@@ -282,9 +180,19 @@ public class PluginMain extends JavaPlugin implements Listener {
                         return true;
                     }
                 }
+            }else if(args.length  == 2 && args[0].equalsIgnoreCase("setprefix")){
+                try {
+                    putConfig("Dialogue.Trigger_Prefix",args[1]);
+                } catch (IOException e) {
+                    sender.sendMessage("修改聊天前缀时发生错误！详情请查看服务器控制台。");
+                    getLogger().warning("修改前缀时发生错误！信息如下：");
+                    e.printStackTrace();
+                    return true;
+                }
+                sender.sendMessage("已成功修改聊天前缀！");
+                return true;
             }else
-                //TODO:2017/09/18: 新设置代码块，明天再写
-
+                //TODO:2017/09/19: 添加自由聊天开关命令和机器人名称修改命令
 
 
 
@@ -315,7 +223,8 @@ public class PluginMain extends JavaPlugin implements Listener {
                     "用法:/setrobot [选项] <参数...>" +
                             "   选项:" +
                             "setkey - 设置新的ApiKey【命令用法：/setrobot setkey {ApiKey} <--reload/-r>】" +
-                            "reload - 重载设置，目前仅重载ApiKey【命令用法：/setrobot reload】";
+                            "reload - 重载设置，目前仅重载ApiKey【命令用法：/setrobot reload】"
+                    ;
 
             sender.sendMessage(u);
             return true;
@@ -337,11 +246,6 @@ public class PluginMain extends JavaPlugin implements Listener {
             getLogger().info("[调试] " + "事件被取消，放弃处理");
             return;
         }
-
-        //开发所留下的调试代码
-        getLogger().info("PlayerCharEventInfo:");
-        getLogger().info(event.getFormat());
-        getLogger().info(event.getMessage());
 
         //如果停用了聊天对话模式，则忽略事件
         if(!cfg.getProperty("Dialogue.Chat_Trigger","false").equalsIgnoreCase("true")){
@@ -410,5 +314,118 @@ public class PluginMain extends JavaPlugin implements Listener {
             //发送公屏信息
             Bukkit.broadcastMessage(rs);
         }).start();
+    }
+
+    //---------------功能相关方法---------------
+
+    /**
+     * 新的载入
+     * @return ApiKey是否载入成功
+     */
+    private boolean LoadApiKey_New(){
+        String Key = cfg.getProperty("Robot.ApiKey","");
+        getLogger().info("[调试] ApiKey:" + Key);
+        if(Key.equalsIgnoreCase("")){
+            getLogger().warning("ApiKey文件为空，请填入ApiKey！");
+        }else if(Key.length() != 32){
+            //长度不对
+            getLogger().warning("不是一个标准的ApiKey！");
+            return false;
+        }
+        TLR.SetApiKey(Key);
+        getLogger().info("ApiKey已成功载入");
+        return true;
+    }
+
+    /**
+     * 载入配置
+     * @return 返回是否载入成功
+     */
+    private boolean LoadConfig() throws IOException {
+        //获得插件数据文件夹
+        File df = getDataFolder();
+        //检查文件夹是否存在，或是否为文件
+        if(!df.exists() || df.isFile()){
+            //是就删除，然后重新创建
+            df.delete();
+            if(!df.mkdir()){
+                getLogger().warning("插件数据文件夹创建失败！请手动创建【TulingRobot】文件夹");
+                return false;
+            }
+        }
+        //指定配置文件路径获取File对象
+        File configFile = new File(getDataFolder().getPath() + "/config.properties");
+        //检查文件是否存在
+        if(configFile.exists()){
+            //确保 是一个文件
+            if(configFile.isFile()){
+                //载入配置
+                cfg.load(new InputStreamReader(new FileInputStream(configFile),"UTF-8"));
+                return true;
+            }else{
+                //不是，返回
+                getLogger().warning("config.properties不是文件！");
+                return false;
+            }
+        }else{
+            //没有文件，生成一个
+            InputStream config = this.getClass().getResourceAsStream("/config.properties");
+            if(config == null){
+                getLogger().warning("获取默认配置文件失败！请使用解压工具打开插件，解压【config.properties】文件到[plugins/TulingRobot]目录！");
+                return false;
+            }
+            byte[] b = new byte[config.available()];
+            if(config.read(b) == config.available()){
+                FileOutputStream fos = new FileOutputStream(configFile);
+                //写入文件
+                fos.write(b);
+                //刷新缓冲区
+                fos.flush();
+                //关闭输出流
+                fos.close();
+                //读入配置
+                cfg.load(new InputStreamReader(new FileInputStream(configFile),"UTF-8"));
+                getLogger().warning("config.properties文件不存在，插件已自动创建，进行设置后使用【/setRobot reload】重载配置");
+                return false;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 修改配置<br/>
+     * 自动保存
+     * @param k 键
+     * @param v 值
+     * @throws IOException 读取配置时可能发生的异常
+     */
+    private void putConfig(String k,String v) throws IOException {
+        LoadConfig();
+        cfg.put(k,v);
+        SaveConfig();
+    }
+
+    private void SaveConfig() throws IOException {
+        cfg.store(new FileOutputStream(new File(getDataFolder().getPath() + "/config.properties")),"TulingRobot_V" + Plugin_Version + " - ConfigFile");
+    }
+
+    /**
+     * 置ApiKey到文件
+     * @param ApiKey 新的ApiKey\n
+     * @throws IOException 写入文件时可能发生的异常
+     */
+    private void SetApiKey(String ApiKey) throws IOException {
+        /*
+        //获取文件File对象
+        File KeyFile = new File(getDataFolder().getPath() + "/ApiKey.txt");
+        FileOutputStream fos = new FileOutputStream(KeyFile);
+        fos.write(ApiKey.getBytes("UTF-8"));
+        fos.flush();
+        fos.close();
+        */
+
+        //新方法
+        putConfig("Robot.ApiKey",ApiKey);
+        getLogger().info("机器人ApiKey已修改(New_Key: " + ApiKey + ")");
     }
 }
