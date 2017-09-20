@@ -28,6 +28,7 @@ import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.*;
+import java.util.Arrays;
 import java.util.Properties;
 
 /**
@@ -154,10 +155,13 @@ public class PluginMain extends JavaPlugin implements Listener {
             return true;
         } else
             //------------------------------机器人设置命令------------------------------
-            if (cmd.getName().equalsIgnoreCase("setrobot")) {
+            if (cmd.getName().equalsIgnoreCase("setrobot") && args.length >= 1) {
+                getLogger().info("[调试] 进入机器人设置");
+                getLogger().info("[调试] args:" + Arrays.toString(args));
                 //TODO:2017/09/18: 添加【机器人名，自由聊天开关】设置命令
                 //两个参数，则为修改ApiKey而不重载
-                if (args.length == 2 || args.length == 3 && args[0].equalsIgnoreCase("setkey")) {
+                if (args[0].equalsIgnoreCase("apikey")) {
+                    getLogger().info("[调试] 进入修改ApiKey");
                     //标准图灵机器人ApiKey是32位长度的
                     if (args[1].length() == 32) {
                         //更改ApiKey
@@ -187,41 +191,59 @@ public class PluginMain extends JavaPlugin implements Listener {
                         sender.sendMessage("ApiKey有误(长度错误)");
                         return true;
                     }
-                }else if (args.length == 2 && args[0].equalsIgnoreCase("prefix")) {
-                    try {
-                        putConfig("Dialogue.Trigger_Prefix", args[1]);
-                    } catch (IOException e) {
-                        sender.sendMessage("修改聊天前缀时发生错误！详情请查看服务器控制台。");
-                        getLogger().warning("修改前缀时发生错误！信息如下：");
-                        e.printStackTrace();
+                } else
+                    if(args.length == 2){
+                    //设置聊天前缀
+                    if (args[0].equalsIgnoreCase("prefix")) {
+                        getLogger().info("[调试] 进入修改聊天前缀");
+                        try {
+                            //选择清除还是更改
+                            putConfig(
+                                    "Dialogue.Trigger_Prefix",
+                                    args[1].equalsIgnoreCase("-r") ? "" : args[1]
+                            );
+                        } catch (IOException e) {
+                            sender.sendMessage("修改聊天前缀时发生错误！详情请查看服务器控制台。");
+                            getLogger().warning("修改前缀时发生错误！信息如下：");
+                            e.printStackTrace();
+                            return true;
+                        }
+                        sender.sendMessage("已成功修改聊天前缀！");
                         return true;
-                    }
-                    sender.sendMessage("已成功修改聊天前缀！");
-                    return true;
-                } else if (args.length == 2 && args[0].equalsIgnoreCase("robotname")) {
-                    try {
-                        putConfig("Robot.Name", args[1]);
-                    } catch (IOException e) {
-                        sender.sendMessage("修改机器人名称时发生错误！详情请查看服务器控制台。");
-                        getLogger().warning("修改机器人名称时发生错误！信息如下：");
-                        e.printStackTrace();
-                        return true;
-                    }
-                } else if (args.length == 2 && args[0].equalsIgnoreCase("chattrigger")) {
-                    try {
-                        putConfig(
-                                "Dialogue.Chat_Trigger",
-                                args[1].equalsIgnoreCase("-r") ? "" : args[1]
-                        );
-                    } catch (IOException e) {
-                        sender.sendMessage("修改设置时发生错误！详情请查看服务器控制台。");
-                        getLogger().warning("修改设置时发生错误！信息如下：");
-                        e.printStackTrace();
+                    } else
+                        //设置机器人名称
+                        if (args[0].equalsIgnoreCase("robotname")) {
+                            getLogger().info("[调试] 进入修改机器人名称");
+                        try {
+                            putConfig("Robot.Name", args[1]);
+                        } catch (IOException e) {
+                            sender.sendMessage("修改机器人名称时发生错误！详情请查看服务器控制台。");
+                            getLogger().warning("修改机器人名称时发生错误！信息如下：");
+                            e.printStackTrace();
+                            return true;
+                        }
+                            sender.sendMessage("已成功修改机器人名称！");
+                            return true;
+                    } else
+                        //设置聊天前缀
+                        if (args[0].equalsIgnoreCase("chattrigger")) {
+                            getLogger().info("[调试] 进入修改聊天模式");
+                        try {
+                            putConfig(
+                                    "Dialogue.Chat_Trigger",
+                                    args[1]
+                            );
+                        } catch (IOException e) {
+                            sender.sendMessage("修改设置时发生错误！详情请查看服务器控制台。");
+                            getLogger().warning("修改设置时发生错误！信息如下：");
+                            e.printStackTrace();
+                            return true;
+                        }
+                        sender.sendMessage("已成功修改自由聊天模式！");
                         return true;
                     }
                 } else
-                    //或者重载Key
-                    //以后会重载配置
+                    //重载配置
                     if (args.length == 1 && args[0].equalsIgnoreCase("reload")) {
                         getLogger().info("正在载入配置");
                         try {
@@ -243,13 +265,12 @@ public class PluginMain extends JavaPlugin implements Listener {
                 //帮助说明
                 String u =
                         "用法:/setrobot [选项] <参数...>"                                                            + "\n" +
-                        "    选项(支持全小写):"                                                                      + "\n" +
-                        "        setkey       - 设置新的ApiKey【命令用法：/setrobot setkey {ApiKey} <--reload/-r>】" + "\n" +
+                        "    选项(支持小写):"                                                                      + "\n" +
+                        "        ApiKey       - 设置新的ApiKey【命令用法：/setrobot setkey {ApiKey} <--reload/-r>】" + "\n" +
                         "        RobotName    - 设置新的机器人名称(自由聊天模式有效)"                                + "\n" +
                         "        Prefix       - 设置自由聊天的前缀(设置为【-r】可删除前缀)"                          + "\n" +
                         "        ChatTrigger  - 设置自由聊天模式开关，true为开启，false或其他字符为关闭"             + "\n" +
-                        "        reload       - 重载设置，目前仅重载ApiKey【命令用法：/setrobot reload】"            + "\n";
-
+                        "        reload       - 重载设置，目前仅重载ApiKey【命令用法：/setrobot reload】"            ;
                 sender.sendMessage(u);
                 return true;
         }

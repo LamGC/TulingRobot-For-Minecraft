@@ -10,7 +10,7 @@ commands:
           permission-message: 嘿！你还没有与机器人聊天的权限呢！快向OP申请获得权限吧！
      setrobot:
                description: 修改机器人相关设置
-               usage: /setrobot [Option(选项)] <args(参数)...>
+               usage: /setrobot [Option(选项)/help] <args(参数)...>
                permission: TulingRobot.setRobot
                permission-message: 你不是我的Master！
 permissions:
