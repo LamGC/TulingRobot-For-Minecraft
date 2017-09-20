@@ -265,7 +265,7 @@ public class PluginMain extends JavaPlugin implements Listener {
                 //帮助说明
                 String u =
                         "用法:/setrobot [选项] <参数...>"                                                            + "\n" +
-                        "    选项(支持小写):"                                                                      + "\n" +
+                        "    选项(支持小写):"                                                                       + "\n" +
                         "        ApiKey       - 设置新的ApiKey【命令用法：/setrobot setkey {ApiKey} <--reload/-r>】" + "\n" +
                         "        RobotName    - 设置新的机器人名称(自由聊天模式有效)"                                + "\n" +
                         "        Prefix       - 设置自由聊天的前缀(设置为【-r】可删除前缀)"                          + "\n" +
