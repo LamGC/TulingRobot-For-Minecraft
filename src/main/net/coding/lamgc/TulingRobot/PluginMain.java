@@ -129,121 +129,129 @@ public class PluginMain extends JavaPlugin implements Listener {
                 e.printStackTrace();
                 return true;
             }
-            if(rem == null){
+            //Null检查
+            if (rem == null) {
                 getLogger().warning("调用机器人失败！(调用返回不是合法Json)");
                 sender.sendMessage("[错误] 机器人调用失败！");
                 return true;
             }
+            //返回代码判断
             int code = rem.get("code").getAsInt();
             if (code == TulingRobot.TLCode.Text) {
+                //文本类消息
                 sender.sendMessage(rem.get("text").getAsString());
             } else if (code == TulingRobot.TLCode.Url) {
+                //带Url消息
                 sender.sendMessage(rem.get("text") + "(Url:" + rem.get("url") + ")");
             } else if (code >= TulingRobot.TLCode.News && code <= TulingRobot.TLCode.children_Poetry) {
+                //不支持儿童版和菜谱类
                 sender.sendMessage("[插件]本功能咱不支持");
             } else if (code >= TulingRobot.TLCode.Error_KeyError) {
+                //错误信息
                 sender.sendMessage("[错误]" + TLR.getErrorString(code) + "(" + code + ")");
                 getLogger().warning("[错误]" + TLR.getErrorString(code) + "(" + code + ")");
             }
             return true;
-        }else
+        } else
             //------------------------------机器人设置命令------------------------------
-            if(cmd.getName().equalsIgnoreCase("setrobot")){
-            //TODO:2017/09/18: 添加【机器人名，自由聊天开关】设置命令
-            //两个参数，则为修改ApiKey而不重载
-            if(args[0].equalsIgnoreCase("setkey") && args.length == 2 || args.length == 3){
-                //标准图灵机器人ApiKey是32位长度的
-                if(args[1].length() == 32){
-                    //更改ApiKey
-                    try {
-                        SetApiKey(args[1]);
-                        sender.sendMessage("已成功修改ApiKey");
-                        getLogger().info("ApiKey已修改，新ApiKey:[" + args[1] + "]");
-                        if(args.length == 3 && args[2].equalsIgnoreCase("--reload") || args[2].equalsIgnoreCase("-r")){
-                            //重新载入配置
-                            getLogger().info("正在载入配置");
-                            if(LoadConfig()){
-                                getLogger().info("已成功载入配置");
-                                sender.sendMessage("已成功载入配置");
-                            }else{
-                                getLogger().info("载入配置失败");
-                                sender.sendMessage("载入配置失败");
+            if (cmd.getName().equalsIgnoreCase("setrobot")) {
+                //TODO:2017/09/18: 添加【机器人名，自由聊天开关】设置命令
+                //两个参数，则为修改ApiKey而不重载
+                if (args.length == 2 || args.length == 3 && args[0].equalsIgnoreCase("setkey")) {
+                    //标准图灵机器人ApiKey是32位长度的
+                    if (args[1].length() == 32) {
+                        //更改ApiKey
+                        try {
+                            SetApiKey(args[1]);
+                            sender.sendMessage("已成功修改ApiKey");
+                            getLogger().info("ApiKey已修改，新ApiKey:[" + args[1] + "]");
+                            if (args.length == 3 && args[2].equalsIgnoreCase("--reload") || args[2].equalsIgnoreCase("-r")) {
+                                //重新载入配置
+                                getLogger().info("正在载入配置");
+                                if (LoadConfig()) {
+                                    getLogger().info("已成功载入配置");
+                                    sender.sendMessage("已成功载入配置");
+                                } else {
+                                    getLogger().info("载入配置失败");
+                                    sender.sendMessage("载入配置失败");
+                                }
                             }
+                            return true;
+                        } catch (IOException e) {
+                            sender.sendMessage("执行操作时发生了一个异常！详细信息请查看服务器控制台。");
+                            getLogger().warning("发送了一个严重的问题：");
+                            e.printStackTrace();
+                            return true;
                         }
+                    } else {
+                        sender.sendMessage("ApiKey有误(长度错误)");
                         return true;
+                    }
+                }else if (args.length == 2 && args[0].equalsIgnoreCase("prefix")) {
+                    try {
+                        putConfig("Dialogue.Trigger_Prefix", args[1]);
                     } catch (IOException e) {
-                        sender.sendMessage("执行操作时发生了一个异常！详细信息请查看服务器控制台。");
-                        getLogger().warning("发送了一个严重的问题：");
+                        sender.sendMessage("修改聊天前缀时发生错误！详情请查看服务器控制台。");
+                        getLogger().warning("修改前缀时发生错误！信息如下：");
                         e.printStackTrace();
                         return true;
                     }
-                }
-            }else if(args.length  == 2 && args[0].equalsIgnoreCase("prefix")){
-                try {
-                    putConfig("Dialogue.Trigger_Prefix",args[1]);
-                } catch (IOException e) {
-                    sender.sendMessage("修改聊天前缀时发生错误！详情请查看服务器控制台。");
-                    getLogger().warning("修改前缀时发生错误！信息如下：");
-                    e.printStackTrace();
+                    sender.sendMessage("已成功修改聊天前缀！");
                     return true;
-                }
-                sender.sendMessage("已成功修改聊天前缀！");
-                return true;
-            }else if(args.length == 2 && args[0].equalsIgnoreCase("robotname")){
+                } else if (args.length == 2 && args[0].equalsIgnoreCase("robotname")) {
                     try {
-                        putConfig("Robot.Name",args[1]);
+                        putConfig("Robot.Name", args[1]);
                     } catch (IOException e) {
                         sender.sendMessage("修改机器人名称时发生错误！详情请查看服务器控制台。");
                         getLogger().warning("修改机器人名称时发生错误！信息如下：");
                         e.printStackTrace();
                         return true;
                     }
-            }else if(args.length == 2 && args[0].equalsIgnoreCase("chattrigger")){
-                try {
-                    putConfig(
-                            "Dialogue.Chat_Trigger",
-                            args[1].equalsIgnoreCase("-r") ? "" : args[1]
-                    );
-                } catch (IOException e) {
-                    sender.sendMessage("修改设置时发生错误！详情请查看服务器控制台。");
-                    getLogger().warning("修改设置时发生错误！信息如下：");
-                    e.printStackTrace();
-                    return true;
-                }
-            }else
-                //或者重载Key
-                //以后会重载配置
-                if(args.length == 1 && args[0].equalsIgnoreCase("reload")){
-                    getLogger().info("正在载入配置");
+                } else if (args.length == 2 && args[0].equalsIgnoreCase("chattrigger")) {
                     try {
-                        //读取配置
-                        if(LoadConfig()){
-                            getLogger().info("已成功载入配置");
-                            sender.sendMessage("已成功载入配置");
-                        }else{
-                            getLogger().info("载入配置失败");
-                            sender.sendMessage("载入配置失败");
-                        }
+                        putConfig(
+                                "Dialogue.Chat_Trigger",
+                                args[1].equalsIgnoreCase("-r") ? "" : args[1]
+                        );
                     } catch (IOException e) {
-                        getLogger().info("载入配置时发生异常：");
-                        sender.sendMessage("载入配置出错，详细信息请查看服务器控制台！");
+                        sender.sendMessage("修改设置时发生错误！详情请查看服务器控制台。");
+                        getLogger().warning("修改设置时发生错误！信息如下：");
                         e.printStackTrace();
+                        return true;
                     }
-                return true;
-            }
-            //帮助说明
-            String u =
-                            "用法:/setrobot [选项] <参数...>" + "\n" +
-                            "    选项(支持全小写):" + "\n" +
-                            "        setkey       - 设置新的ApiKey【命令用法：/setrobot setkey {ApiKey} <--reload/-r>】" + "\n" +
-                            "        RobotName    - 设置新的机器人名称(自由聊天模式有效)" + "\n" +
-                            "        Prefix       - 设置自由聊天的前缀(设置为【-r】可删除前缀)" + "\n" +
-                            "        ChatTrigger  - 设置自由聊天模式开关，true为开启，false或其他字符为关闭" + "\n" +
-                            "        reload       - 重载设置，目前仅重载ApiKey【命令用法：/setrobot reload】" + "\n"
-                    ;
+                } else
+                    //或者重载Key
+                    //以后会重载配置
+                    if (args.length == 1 && args[0].equalsIgnoreCase("reload")) {
+                        getLogger().info("正在载入配置");
+                        try {
+                            //读取配置
+                            if (LoadConfig()) {
+                                getLogger().info("已成功载入配置");
+                                sender.sendMessage("已成功载入配置");
+                            } else {
+                                getLogger().info("载入配置失败");
+                                sender.sendMessage("载入配置失败");
+                            }
+                        } catch (IOException e) {
+                            getLogger().info("载入配置时发生异常：");
+                            sender.sendMessage("载入配置出错，详细信息请查看服务器控制台！");
+                            e.printStackTrace();
+                        }
+                        return true;
+                    }
+                //帮助说明
+                String u =
+                        "用法:/setrobot [选项] <参数...>"                                                            + "\n" +
+                        "    选项(支持全小写):"                                                                      + "\n" +
+                        "        setkey       - 设置新的ApiKey【命令用法：/setrobot setkey {ApiKey} <--reload/-r>】" + "\n" +
+                        "        RobotName    - 设置新的机器人名称(自由聊天模式有效)"                                + "\n" +
+                        "        Prefix       - 设置自由聊天的前缀(设置为【-r】可删除前缀)"                          + "\n" +
+                        "        ChatTrigger  - 设置自由聊天模式开关，true为开启，false或其他字符为关闭"             + "\n" +
+                        "        reload       - 重载设置，目前仅重载ApiKey【命令用法：/setrobot reload】"            + "\n";
 
-            sender.sendMessage(u);
-            return true;
+                sender.sendMessage(u);
+                return true;
         }
         return false;
     }
