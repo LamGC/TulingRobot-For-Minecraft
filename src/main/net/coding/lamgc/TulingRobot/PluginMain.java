@@ -83,7 +83,7 @@ public class PluginMain extends JavaPlugin implements Listener {
             getLogger().warning("载入配置时发生异常：");
             e.printStackTrace();
         }
-        getLogger().info("插件已就绪(Version:V" + Plugin_Version);
+        getLogger().info("插件已就绪(Version:V" + Plugin_Version + ")");
     }
 
     /**
