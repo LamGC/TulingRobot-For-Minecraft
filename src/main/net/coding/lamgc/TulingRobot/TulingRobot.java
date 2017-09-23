@@ -89,7 +89,7 @@ public class TulingRobot {
         //String re = HttpRequest.sendGet(ApiV1_Url,new String(ss.getBytes(),"UTF-8"));
         String re = HttpRequest.sendPost(
                 ApiV1_Url,
-                new String(sj.toString().getBytes("UTF-8")),
+                sj.toString(),
                 "application/json"
         );
         //输出JsonString以检查是否正确

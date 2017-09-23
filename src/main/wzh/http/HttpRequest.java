@@ -1,9 +1,6 @@
 package wzh.http;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
 
@@ -78,8 +75,8 @@ public class HttpRequest {
      * @throws IOException 在请求失败，输出输入流错误时抛出
      */
     public static String sendPost(String url, String param,String ContentType) throws IOException {
-        PrintWriter out = null;
-        BufferedReader in = null;
+        PrintWriter out;
+        BufferedReader in;
         StringBuilder result = new StringBuilder();
         URL realUrl = new URL(url);
         // 打开和URL之间的连接
@@ -95,7 +92,7 @@ public class HttpRequest {
         conn.setDoOutput(true);
         conn.setDoInput(true);
         // 获取URLConnection对象对应的输出流
-        out = new PrintWriter(conn.getOutputStream());
+        out = new PrintWriter(new OutputStreamWriter(conn.getOutputStream(),"UTF-8"));
         // 发送请求参数
         out.print(param);
         // flush输出流的缓冲

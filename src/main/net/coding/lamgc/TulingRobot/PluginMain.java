@@ -37,8 +37,9 @@ import java.util.Properties;
  */
 public class PluginMain extends JavaPlugin implements Listener {
 
-    //插件相关信息？
-    private final String Plugin_Version = "1.1.2";
+    //插件相关信息
+    private final String Plugin_Version = "1.1.3";
+    //是否初始化了配置文件
     private boolean init_config = false;
 
 
@@ -454,9 +455,14 @@ public class PluginMain extends JavaPlugin implements Listener {
      * @throws IOException 读取配置时可能发生的异常
      */
     private void putConfig(String k,String v) throws IOException {
+        //先读取配置项
+        //获取文件里修改的数据
         LoadConfig();
+        //然后修改值
         cfg.put(k,v);
+        //设置为假
         init_config = false;
+        //保存配置
         SaveConfig();
     }
 
