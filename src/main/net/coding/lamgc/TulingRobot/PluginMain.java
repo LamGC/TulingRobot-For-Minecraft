@@ -39,6 +39,7 @@ public class PluginMain extends JavaPlugin implements Listener {
 
     //插件相关信息？
     private final String Plugin_Version = "1.1.2";
+    private boolean init_config = false;
 
 
     //图灵机器人实例
@@ -46,8 +47,11 @@ public class PluginMain extends JavaPlugin implements Listener {
     //配置项
     private Properties cfg = new Properties();
 
-
-    public static void main(String[] args) throws UnsupportedEncodingException {
+    /**
+     * 无聊的主方法
+     * @param args 运行参数
+     */
+    public static void main(String[] args) {
         System.out.println("请把本Jar文件放入服务器目录下plugins文件夹即可");
         /*
         JsonObject sj = new JsonObject();
@@ -71,6 +75,7 @@ public class PluginMain extends JavaPlugin implements Listener {
      */
     public void onLoad() {
         getLogger().info("插件载入中...");
+
         try {
             if(LoadConfig()) {
                 if (!LoadApiKey()) {
@@ -98,11 +103,13 @@ public class PluginMain extends JavaPlugin implements Listener {
      * 插件被停用(服务器关闭时)
      */
     public void onDisable() {
-        try {
-            SaveConfig();
-        } catch (IOException e) {
-            getLogger().warning("保存配置时发生异常：");
-            e.printStackTrace();
+        if(!init_config){
+            try {
+                SaveConfig();
+            } catch (IOException e) {
+                getLogger().warning("保存配置时发生异常：");
+                e.printStackTrace();
+            }
         }
         //停用插件时注销事件监听器
         HandlerList.unregisterAll((Listener) this);
@@ -146,7 +153,7 @@ public class PluginMain extends JavaPlugin implements Listener {
                 sender.sendMessage(rem.get("text") + "(Url:" + rem.get("url") + ")");
             } else if (code >= TulingRobot.TLCode.News && code <= TulingRobot.TLCode.children_Poetry) {
                 //不支持儿童版和菜谱类
-                sender.sendMessage("[插件]本功能咱不支持");
+                sender.sendMessage("[插件]本功能暂不支持");
             } else if (code >= TulingRobot.TLCode.Error_KeyError) {
                 //错误信息
                 sender.sendMessage("[错误]" + TLR.getErrorString(code) + "(" + code + ")");
@@ -264,13 +271,14 @@ public class PluginMain extends JavaPlugin implements Listener {
                     }
                 //帮助说明
                 String u =
-                        "用法:/setrobot [选项] <参数...>"                                                            + "\n" +
+                        "用法:/setrobot [选项] <参数...>"                                                           + "\n" +
                         "    选项(支持小写):"                                                                       + "\n" +
-                        "        ApiKey       - 设置新的ApiKey【命令用法：/setrobot setkey {ApiKey} <--reload/-r>】" + "\n" +
-                        "        RobotName    - 设置新的机器人名称(自由聊天模式有效)"                                + "\n" +
-                        "        Prefix       - 设置自由聊天的前缀(设置为【-r】可删除前缀)"                          + "\n" +
-                        "        ChatTrigger  - 设置自由聊天模式开关，true为开启，false或其他字符为关闭"             + "\n" +
-                        "        reload       - 重载设置，目前仅重载ApiKey【命令用法：/setrobot reload】"            ;
+                        "        ApiKey      - 设置新的ApiKey"                                                      + "\n" +
+                        "                             【命令用法：/setrobot setkey {ApiKey} <--reload/-r>】"        + "\n" +
+                        "        RobotName   - 设置新的机器人名称(自由聊天模式有效)"                                + "\n" +
+                        "        Prefix      - 设置自由聊天的前缀(设置为【-r】可删除前缀)"                          + "\n" +
+                        "        ChatTrigger - 设置自由聊天模式开关，true为开启，false或其他字符为关闭"             + "\n" +
+                        "        reload      - 重载设置，目前仅重载ApiKey【命令用法：/setrobot reload】"            ;
                 sender.sendMessage(u);
                 return true;
         }
@@ -302,7 +310,7 @@ public class PluginMain extends JavaPlugin implements Listener {
             getLogger().info("[调试] 处理线程已启动，开始异步处理...");
             //前缀，如果需要
             //前缀如果不为空
-            String prefix = cfg.getProperty("Dialogue.Trigger_Prefix");
+            String prefix = cfg.getProperty("Dialogue.Trigger_Prefix","");
             getLogger().info("[调试] 触发前缀: " + prefix);
             if(!prefix.equalsIgnoreCase("")){
                 getLogger().info("[调试] " + "前缀在信息的位置：" + event.getMessage().indexOf(prefix));
@@ -348,7 +356,7 @@ public class PluginMain extends JavaPlugin implements Listener {
             } else if (code == TulingRobot.TLCode.Url) {
                 rs = rs + rj.get("text").getAsString() + "(Url: " + rj.get("url").getAsString() + " )";
             } else if (code >= TulingRobot.TLCode.News && code <= TulingRobot.TLCode.children_Poetry) {
-                rs = rs + "[插件]本功能咱不支持";
+                rs = rs + "[插件]本功能暂不支持";
             } else if (code >= TulingRobot.TLCode.Error_KeyError) {
                 rs = rs + "[错误]" + TLR.getErrorString(code) + "(" + code + ")";
                 getLogger().warning("[错误]" + TLR.getErrorString(code) + "(" + code + ")");
@@ -431,6 +439,7 @@ public class PluginMain extends JavaPlugin implements Listener {
                 //读入配置
                 cfg.load(new InputStreamReader(new FileInputStream(configFile),"UTF-8"));
                 getLogger().warning("config.properties文件不存在，插件已自动创建，进行设置后使用【/setRobot reload】重载配置");
+                init_config = true;
                 return false;
             }
         }
@@ -447,9 +456,14 @@ public class PluginMain extends JavaPlugin implements Listener {
     private void putConfig(String k,String v) throws IOException {
         LoadConfig();
         cfg.put(k,v);
+        init_config = false;
         SaveConfig();
     }
 
+    /**
+     * 保存配置文件
+     * @throws IOException 因为文件或写入出问题会抛出的异常
+     */
     private void SaveConfig() throws IOException {
         cfg.store(new FileOutputStream(new File(getDataFolder().getPath() + "/config.properties")),"TulingRobot_V" + Plugin_Version + " - ConfigFile");
     }
