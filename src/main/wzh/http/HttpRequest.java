@@ -20,7 +20,7 @@ public class HttpRequest {
      * @return URL 所代表远程资源的响应结果
      */
     public static String sendGet(String url, String param) {
-        String result = "";
+        StringBuilder result = new StringBuilder();
         BufferedReader in = null;
         try {
             String urlNameString = url + "?" + param;
@@ -45,7 +45,7 @@ public class HttpRequest {
                     connection.getInputStream(),"UTF-8"));
             String line;
             while ((line = in.readLine()) != null) {
-                result += line;
+                result.append(line);
             }
         } catch (Exception e) {
             //System.out.println("发送GET请求出现异常！" + e);
@@ -61,7 +61,7 @@ public class HttpRequest {
                 e2.printStackTrace();
             }
         }
-        return result;
+        return result.toString();
     }
 
     /**
