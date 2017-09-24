@@ -74,6 +74,7 @@ public class PluginMain extends JavaPlugin implements Listener {
     /**
      * 插件载入中(服务器启动时)
      */
+    @Override
     public void onLoad() {
         getLogger().info("插件载入中...");
 
@@ -95,6 +96,7 @@ public class PluginMain extends JavaPlugin implements Listener {
     /**
      * 插件已启用(插件载入完成)
      */
+    @Override
     public void onEnable() {
         getServer().getPluginManager().registerEvents(this, this);
         getLogger().info("插件已启用");
@@ -103,6 +105,7 @@ public class PluginMain extends JavaPlugin implements Listener {
     /**
      * 插件被停用(服务器关闭时)
      */
+    @Override
     public void onDisable() {
         if(!init_config){
             try {
@@ -125,6 +128,7 @@ public class PluginMain extends JavaPlugin implements Listener {
      * @param args   命令参数(和main的args参数一样)
      * @return 是否完成处理
      */
+    @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
         //TODO:2017/09/15: 注意清理 [调试] 代码
         //如果是调用机器人的命令
