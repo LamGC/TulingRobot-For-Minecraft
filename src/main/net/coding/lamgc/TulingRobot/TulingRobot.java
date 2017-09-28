@@ -123,7 +123,7 @@ public class TulingRobot {
     }
 
     /**
-     * 返回信息的Code
+     * 返回信息的Code(V1_Api)
      */
     public static class TLCode{
         //文字类返回
