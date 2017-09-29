@@ -334,31 +334,31 @@ public class PluginMain extends JavaPlugin implements Listener {
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerCharEvent(AsyncPlayerChatEvent event) {
         //TODO:2017/09/15: 注意清理 [调试] 代码
-        getLogger().info("[调试] " + "玩家聊天事件被触发");
+        //getLogger().info("[调试] " + "玩家聊天事件被触发");
         if(event.isCancelled()){
             //如果事件被取消，则放弃处理，防止浪费调用次数
-            getLogger().info("[调试] " + "事件被取消，放弃处理");
+            //getLogger().info("[调试] " + "事件被取消，放弃处理");
             return;
         }
 
         //如果停用了聊天对话模式，则忽略事件
         if(!cfg.getProperty("Dialogue.Chat_Trigger","false").equalsIgnoreCase("true")){
-            getLogger().info("[调试] " + "聊天对话模式被关闭，放弃处理");
+            //getLogger().info("[调试] " + "聊天对话模式被关闭，放弃处理");
             return;
         }
         //异步处理方法
         new Thread(() -> {
-            getLogger().info("[调试] 处理线程已启动，开始异步处理...");
+            //getLogger().info("[调试] 处理线程已启动，开始异步处理...");
             //前缀，如果需要
             //前缀如果不为空
             String prefix = cfg.getProperty("Dialogue.Trigger_Prefix","");
-            getLogger().info("[调试] 触发前缀: " + prefix);
+            //getLogger().info("[调试] 触发前缀: " + prefix);
             if(!prefix.equalsIgnoreCase("")){
-                getLogger().info("[调试] " + "前缀在信息的位置：" + event.getMessage().indexOf(prefix));
+                //getLogger().info("[调试] " + "前缀在信息的位置：" + event.getMessage().indexOf(prefix));
                 //如果发现了前缀(在开头)
                 if(event.getMessage().indexOf(prefix) != 0){
                     //不处理非指定前缀消息
-                    getLogger().info("[调试] " + "前缀不正确，放弃处理");
+                    //getLogger().info("[调试] " + "前缀不正确，放弃处理");
                     return;
                 }
             }
@@ -367,12 +367,12 @@ public class PluginMain extends JavaPlugin implements Listener {
             JsonObject rj;
             try {
                 //调用机器人
-                getLogger().info("[调试] " + "调用机器人...");
+                //getLogger().info("[调试] " + "调用机器人...");
                 //清除前缀信息
                 rj = TLR.Robot(event.getMessage().replace(prefix,""), event.getPlayer().getName());
-                getLogger().info("[调试] " + "调用完毕，开始处理");
+                //getLogger().info("[调试] " + "调用完毕，开始处理");
             } catch (IOException e) {
-                Bukkit.broadcastMessage("执行操作时发生了一个异常！详细信息请查看服务器控制台。");
+                Bukkit.broadcastMessage("[错误]执行操作时发生了一个异常！详细信息请查看服务器控制台。");
                 getLogger().warning("调用机器人时发生了异常，信息如下:");
                 e.printStackTrace();
                 return;
@@ -380,15 +380,14 @@ public class PluginMain extends JavaPlugin implements Listener {
 
             if(rj == null){
                 getLogger().warning("调用机器人失败！(调用返回不是合法Json)");
-                //sendMsgToOnlinePlayers("[错误] 机器人调用失败！");
-                Bukkit.broadcastMessage("[错误] 机器人调用失败！");
+                Bukkit.broadcastMessage("[错误]机器人调用失败！");
                 return;
             }
 
             //前缀设置
             //测试发现有点别扭，所以加个空格- -
             String rs = cfg.getProperty("Robot.Name","").equalsIgnoreCase("") ? "" : cfg.getProperty("Robot.Name") + ": ";
-            getLogger().info("[调试] " + "机器人回复前缀：" + rs);
+            //getLogger().info("[调试] " + "机器人回复前缀：" + rs);
 
             //根据code设置返回值
             int code = rj.get("code").getAsInt();
@@ -403,8 +402,8 @@ public class PluginMain extends JavaPlugin implements Listener {
                 getLogger().warning("[错误]" + TLR.getErrorString(code) + "(" + code + ")");
             }
 
-            getLogger().info("[调试] " + "最终消息：" + rs);
-            getLogger().info("[调试] " + "开始发送公屏信息");
+            //getLogger().info("[调试] " + "最终消息：" + rs);
+            //getLogger().info("[调试] " + "开始发送公屏信息");
             //发送公屏信息
             Bukkit.broadcastMessage(rs);
         }).start();
@@ -418,7 +417,7 @@ public class PluginMain extends JavaPlugin implements Listener {
      */
     private boolean LoadApiKey(){
         String Key = cfg.getProperty("Robot.ApiKey","");
-        getLogger().info("[调试] ApiKey:" + Key);
+        //getLogger().info("[调试] ApiKey:" + Key);
         if(Key.equalsIgnoreCase("")){
             getLogger().warning("ApiKey文件为空，请填入ApiKey！");
         }else if(Key.length() != 32){
