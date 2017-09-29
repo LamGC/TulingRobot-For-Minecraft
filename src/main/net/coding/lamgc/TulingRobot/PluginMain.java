@@ -38,7 +38,7 @@ import java.util.Properties;
 public class PluginMain extends JavaPlugin implements Listener {
 
     //插件相关信息
-    private final String Plugin_Version = "1.1.3";
+    private final String Plugin_Version = "1.1.4";
     //是否初始化了配置文件
     private boolean init_config = false;
 
@@ -98,6 +98,7 @@ public class PluginMain extends JavaPlugin implements Listener {
      */
     @Override
     public void onEnable() {
+        //注册事件
         getServer().getPluginManager().registerEvents(this, this);
         getLogger().info("插件已启用");
     }
@@ -288,20 +289,24 @@ public class PluginMain extends JavaPlugin implements Listener {
                             String str;
                             String ct = cfg.getProperty("Dialogue.Chat_Trigger");
                             String ct2 = cfg.getProperty("Dialogue.Chat_Trigger").equalsIgnoreCase("true")?"已启用":"已停用";
+                            String tp1 = cfg.getProperty("Dialogue.Trigger_Prefix").equalsIgnoreCase("")?"(空)":cfg.getProperty("Dialogue.Trigger_Prefix");
+                            //判断是否为后台发出后指令
                             if(sender instanceof ConsoleCommandSender){
-                                str =
+                                //保护隐私，只有后台能查出机器人ApiKey
+                                str = "\n" +
                                         "机器人ApiKey: " + cfg.getProperty("Robot.ApiKey") + "\n" +
-                                                "机器人名称: " + cfg.getProperty("Robot.Name") + "\n" +
-                                                "自由聊天模式状态: " + ct2 + "(" + ct + ")" + "\n" +
-                                                "聊天触发前缀: " + cfg.getProperty("Dialogue.Trigger_Prefix");
+                                        "机器人名称: " + cfg.getProperty("Robot.Name") + "\n" +
+                                        "自由聊天模式状态: " + ct2 + "(值: " + ct + ")" + "\n" +
+                                        "聊天触发前缀: " + tp1;
                             }else{
-                                str =
+                                str = "\n" +
                                         "机器人ApiKey为敏感项，请前往服务器控制台执行本命令查询。" + "\n" +
-                                                "机器人名称: " + cfg.getProperty("Robot.Name") + "\n" +
-                                                "自由聊天模式状态: " + ct2 + "(" + ct + ")" + "\n" +
-                                                "聊天触发前缀: " + cfg.getProperty("Dialogue.Trigger_Prefix");
+                                        "机器人名称: " + cfg.getProperty("Robot.Name") + "\n" +
+                                        "自由聊天模式状态: " + ct2 + "(值: " + ct + ")" + "\n" +
+                                        "聊天触发前缀: " + tp1;
                             }
                             sender.sendMessage(str);
+                            return true;
                         }
                     }
                 //帮助说明
