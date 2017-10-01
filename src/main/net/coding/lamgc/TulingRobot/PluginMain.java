@@ -44,14 +44,15 @@ public class PluginMain extends JavaPlugin implements Listener {
 
 
     //图灵机器人实例
-    private static TulingRobot TLR = new TulingRobot();
+    private final TulingRobot TLR = new TulingRobot();
     //配置项
-    private Properties cfg = new Properties();
+    private final Properties cfg = new Properties();
 
     /**
      * 无聊的主方法
      * @param args 运行参数
      */
+    @SuppressWarnings("SpellCheckingInspection")
     public static void main(String[] args) {
         System.out.println("请把本Jar文件放入服务器目录下plugins文件夹即可");
         /*
@@ -171,9 +172,8 @@ public class PluginMain extends JavaPlugin implements Listener {
             if (cmd.getName().equalsIgnoreCase("setrobot") && args.length >= 1) {
                 //getLogger().info("[调试] 进入机器人设置");
                 //getLogger().info("[调试] args:" + Arrays.toString(args));
-                //TODO:2017/09/18: 添加【机器人名，自由聊天开关】设置命令
                 //两个参数，则为修改ApiKey而不重载
-                if (args[0].equalsIgnoreCase("apikey")) {
+                if (args[0].equalsIgnoreCase("apikey") && args.length <= 3) {
                     //getLogger().info("[调试] 进入修改ApiKey");
                     //标准图灵机器人ApiKey是32位长度的
                     if (args[1].length() == 32) {
@@ -319,7 +319,7 @@ public class PluginMain extends JavaPlugin implements Listener {
                         "        Prefix      - 设置自由聊天的前缀(设置为【-r】可删除前缀)"                                          + "\n" +
                         "        ChatTrigger - 设置自由聊天模式开关，true为开启，false或其他字符为关闭"                             + "\n" +
                         "        Check       - 查看所有设置项的值(功能状态)"                                                        + "\n" +
-                        "        reload      - 重载设置，目前仅重载ApiKey【命令用法：/setrobot reload】"                            ;
+                        "        reload      - 重载设置"                            ;
                 sender.sendMessage(u);
                 return true;
         }
@@ -440,9 +440,13 @@ public class PluginMain extends JavaPlugin implements Listener {
         //检查文件夹是否存在，或是否为文件
         if(!df.exists() || df.isFile()){
             //是就删除，然后重新创建
-            df.delete();
-            if(!df.mkdir()){
-                getLogger().warning("插件数据文件夹创建失败！请手动创建【TulingRobot】文件夹");
+            if(df.delete()){
+                if(!df.mkdir()){
+                    getLogger().warning("插件数据文件夹创建失败！请手动创建【TulingRobot】文件夹");
+                    return false;
+                }
+            }else{
+                getLogger().warning("数据文件夹异常，清理失败！");
                 return false;
             }
         }
@@ -498,7 +502,7 @@ public class PluginMain extends JavaPlugin implements Listener {
         //获取文件里修改的数据
         LoadConfig();
         //然后修改值
-        cfg.put(k,v);
+        cfg.setProperty(k, v);
         //设置为假
         init_config = false;
         //保存配置

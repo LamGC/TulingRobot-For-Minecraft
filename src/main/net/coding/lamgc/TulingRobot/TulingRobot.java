@@ -27,6 +27,7 @@ import java.io.IOException;
  * 图灵机器人Api
  * @author LamGC
  */
+@SuppressWarnings("WeakerAccess")
 public class TulingRobot {
 
     private String ApiKey;
