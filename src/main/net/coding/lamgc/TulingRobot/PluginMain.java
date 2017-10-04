@@ -17,6 +17,7 @@
 package net.coding.lamgc.TulingRobot;
 
 import com.google.gson.JsonObject;
+import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -26,6 +27,8 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.event.server.PluginDisableEvent;
+import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.*;
@@ -47,6 +50,9 @@ public class PluginMain extends JavaPlugin implements Listener {
     private final TulingRobot TLR = new TulingRobot();
     //配置项
     private final Properties cfg = new Properties();
+
+    private Economy econ = null;
+
 
     /**
      * 无聊的主方法
@@ -128,7 +134,7 @@ public class PluginMain extends JavaPlugin implements Listener {
      * @param cmd    命令首
      * @param label  命令缩写(不太清楚怎么用)
      * @param args   命令参数(和main的args参数一样)
-     * @return 是否完成处理
+     * @return 是否处理
      */
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
@@ -205,6 +211,7 @@ public class PluginMain extends JavaPlugin implements Listener {
                         return true;
                     }
                 } else
+                    //两个参数的设置
                     if(args.length == 2){
                     //设置聊天前缀
                     if (args[0].equalsIgnoreCase("prefix")) {
@@ -409,6 +416,18 @@ public class PluginMain extends JavaPlugin implements Listener {
         }).start();
     }
 
+    /**
+     * 当有插件禁用时触发.
+     * <p/>
+     * 用来防止Vault被卸载后出现异常
+     * @param event 事件参数
+     */
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onPluginDisable(PluginDisableEvent event){
+
+    }
+
+
     //---------------功能相关方法---------------
 
     /**
@@ -458,10 +477,12 @@ public class PluginMain extends JavaPlugin implements Listener {
             if(configFile.isFile()){
                 //载入配置
                 cfg.load(new InputStreamReader(new FileInputStream(configFile),"UTF-8"));
+                onConfigLoad(true);
                 return true;
             }else{
                 //不是，返回
                 getLogger().warning("config.properties不是文件！");
+                onConfigLoad(false);
                 return false;
             }
         }else{
@@ -469,6 +490,7 @@ public class PluginMain extends JavaPlugin implements Listener {
             InputStream config = this.getClass().getResourceAsStream("/config.properties");
             if(config == null){
                 getLogger().warning("获取默认配置文件失败！请使用解压工具打开插件，解压【config.properties】文件到[plugins/TulingRobot]目录！");
+                onConfigLoad(false);
                 return false;
             }
             byte[] b = new byte[config.available()];
@@ -484,10 +506,45 @@ public class PluginMain extends JavaPlugin implements Listener {
                 cfg.load(new InputStreamReader(new FileInputStream(configFile),"UTF-8"));
                 getLogger().warning("config.properties文件不存在，插件已自动创建，进行设置后使用【/setRobot reload】重载配置");
                 init_config = true;
+                onConfigLoad(false);
                 return false;
             }
         }
+        onConfigLoad(false);
         return false;
+    }
+
+    /**
+     * 这里做配置项读取完成后的事情
+     * @param isTrue 是否成功载入
+     */
+    private void onConfigLoad(boolean isTrue){
+        if(isTrue){
+            if(Integer.getInteger(cfg.getProperty("Econ.Price")) > 0){
+                if(!setupEconomy()){
+                    getLogger().warning("经济前置Vault载入失败！请检查Vault是否正常载入");
+                }
+            }
+        }
+    }
+
+    /**
+     * 加载前置插件(Vault)
+     * <p/>
+     * Vault作者提供的方法-w-
+     * @return 是否成功载入
+     */
+    private boolean setupEconomy() {
+        if (getServer().getPluginManager().getPlugin("Vault") == null) {
+            return false;
+        }
+        RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class);
+        if (rsp == null) {
+            return false;
+        }
+        econ = rsp.getProvider();
+
+        return econ != null;
     }
 
     /**
