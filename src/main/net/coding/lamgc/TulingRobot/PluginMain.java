@@ -44,7 +44,8 @@ public class PluginMain extends JavaPlugin implements Listener {
     private final String Plugin_Version = "1.1.4";
     //是否初始化了配置文件
     private boolean init_config = false;
-
+    //开关
+    private boolean Switch = true;
 
     //图灵机器人实例
     private final TulingRobot TLR = new TulingRobot();
