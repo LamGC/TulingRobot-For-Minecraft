@@ -45,7 +45,7 @@ public class PluginMain extends JavaPlugin implements Listener {
     //是否初始化了配置文件
     private boolean init_config = false;
     //开关
-    private boolean Switch = true;
+    private boolean Switch;
 
     //图灵机器人实例
     private final TulingRobot TLR = new TulingRobot();
@@ -61,7 +61,6 @@ public class PluginMain extends JavaPlugin implements Listener {
      * 无聊的主方法
      * @param args 运行参数
      */
-    @SuppressWarnings("SpellCheckingInspection")
     public static void main(String[] args) {
         System.out.println("请把本Jar文件放入服务器目录下plugins文件夹即可");
         /*
@@ -108,6 +107,9 @@ public class PluginMain extends JavaPlugin implements Listener {
      */
     @Override
     public void onEnable() {
+        if(cfg.getProperty("Robot.Switch").equalsIgnoreCase("true")){
+            Switch = true;
+        }
         //注册事件
         getServer().getPluginManager().registerEvents(this, this);
         getLogger().info("插件已启用");
@@ -144,6 +146,9 @@ public class PluginMain extends JavaPlugin implements Listener {
         //TODO:2017/09/15: 注意清理 [调试] 代码
         //如果是调用机器人的命令
         if (cmd.getName().equalsIgnoreCase("robot") && args.length == 1) {
+            if(!Switch){
+                sender.sendMessage("机器人已停用！");
+            }
             JsonObject rem;
             try {
                 rem = TLR.Robot(args[0], sender.getName());
@@ -204,8 +209,8 @@ public class PluginMain extends JavaPlugin implements Listener {
                             }
                             return true;
                         } catch (IOException e) {
-                            sender.sendMessage("执行操作时发生了一个异常！详细信息请查看服务器控制台。");
-                            getLogger().warning("发送了一个严重的问题：");
+                            sender.sendMessage("修改配置时发生异常，详细信息请查看服务器控制台!");
+                            getLogger().warning("修改配置时发生异常:");
                             e.printStackTrace();
                             return true;
                         }
@@ -226,8 +231,8 @@ public class PluginMain extends JavaPlugin implements Listener {
                                     args[1].equalsIgnoreCase("-r") ? "" : args[1]
                             );
                         } catch (IOException e) {
-                            sender.sendMessage("修改聊天前缀时发生错误！详情请查看服务器控制台。");
-                            getLogger().warning("修改前缀时发生错误！信息如下：");
+                            sender.sendMessage("修改配置时发生异常，详细信息请查看服务器控制台!");
+                            getLogger().warning("修改配置时发生异常:");
                             e.printStackTrace();
                             return true;
                         }
@@ -240,8 +245,8 @@ public class PluginMain extends JavaPlugin implements Listener {
                             try {
                                 putConfig("Robot.Name", args[1]);
                             } catch (IOException e) {
-                                sender.sendMessage("修改机器人名称时发生错误！详情请查看服务器控制台。");
-                                getLogger().warning("修改机器人名称时发生错误！信息如下：");
+                                sender.sendMessage("修改配置时发生异常，详细信息请查看服务器控制台!");
+                                getLogger().warning("修改配置时发生异常:");
                                 e.printStackTrace();
                                 return true;
                             }
@@ -258,16 +263,14 @@ public class PluginMain extends JavaPlugin implements Listener {
                                                 "自由聊天模式已停用"
                                 );
                             }
-
-
                             try {
                                 putConfig(
                                         "Dialogue.Chat_Trigger",
                                         args[1]
                                 );
                             } catch (IOException e) {
-                                sender.sendMessage("修改设置时发生错误！详情请查看服务器控制台。");
-                                getLogger().warning("修改设置时发生错误！信息如下：");
+                                sender.sendMessage("修改配置时发生异常，详细信息请查看服务器控制台!");
+                                getLogger().warning("修改配置时发生异常:");
                                 e.printStackTrace();
                                 return true;
                             }
@@ -277,6 +280,19 @@ public class PluginMain extends JavaPlugin implements Listener {
                 } else
                     //重载配置
                     if (args.length == 1) {
+                        if(args[0].equalsIgnoreCase("switch")){
+                            Switch = !Switch;
+                            try {
+                                putConfig("Robot.Switch",Switch ? "true":"false");
+                            } catch (IOException e) {
+                                sender.sendMessage("修改配置时发生异常，详细信息请查看服务器控制台!");
+                                getLogger().warning("修改配置时发生异常:");
+                                e.printStackTrace();
+                                return true;
+                            }
+                            sender.sendMessage("机器人状态修改成功（" + (!Switch ? "已启用" : "已停用") + " -> " + (Switch ? "已启用" : "已停用") + ")");
+                            return true;
+                        }else
                         //重载插件
                         if(args[0].equalsIgnoreCase("reload")){
                             getLogger().info("正在载入配置");
@@ -291,7 +307,7 @@ public class PluginMain extends JavaPlugin implements Listener {
                                 }
                             } catch (IOException e) {
                                 getLogger().info("载入配置时发生异常：");
-                                sender.sendMessage("载入配置出错，详细信息请查看服务器控制台！");
+                                sender.sendMessage("载入配置出错，详细信息请查看服务器控制台!");
                                 e.printStackTrace();
                             }
                             return true;
@@ -304,12 +320,14 @@ public class PluginMain extends JavaPlugin implements Listener {
                             if(sender instanceof ConsoleCommandSender){
                                 //保护隐私，只有后台能查出机器人ApiKey
                                 str = "\n" +
+                                        "机器人状态: " + (Switch ? "已启用" : "已停用") + "\n" +
                                         "机器人ApiKey: " + cfg.getProperty("Robot.ApiKey") + "\n" +
                                         "机器人名称: " + cfg.getProperty("Robot.Name") + "\n" +
                                         "自由聊天模式状态: " + ct2 + "(值: " + ct + ")" + "\n" +
                                         "聊天触发前缀: " + tp1;
                             }else{
                                 str = "\n" +
+                                        "机器人状态: " + (Switch ? "已启用" : "已停用") + "\n" +
                                         "机器人ApiKey为敏感项，请前往服务器控制台执行本命令查询。" + "\n" +
                                         "机器人名称: " + cfg.getProperty("Robot.Name") + "\n" +
                                         "自由聊天模式状态: " + ct2 + "(值: " + ct + ")" + "\n" +
@@ -350,10 +368,13 @@ public class PluginMain extends JavaPlugin implements Listener {
             //getLogger().info("[调试] " + "事件被取消，放弃处理");
             return;
         }
-
         //如果停用了聊天对话模式，则忽略事件
         if(!cfg.getProperty("Dialogue.Chat_Trigger","false").equalsIgnoreCase("true")){
             //getLogger().info("[调试] " + "聊天对话模式被关闭，放弃处理");
+            return;
+        }
+        //如果停用了机器人，则不处理事件
+        if(!Switch){
             return;
         }
         //异步处理方法
@@ -421,13 +442,14 @@ public class PluginMain extends JavaPlugin implements Listener {
 
     /**
      * 当有插件禁用时触发.
-     * <p/>
-     * 用来防止Vault被卸载后出现异常
+     * 用来防止Vault被卸载后出现异常.
      * @param event 事件参数
      */
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onPluginDisable(PluginDisableEvent event){
-
+        if(!setupEconomy()){
+            getLogger().warning("经济系统重载失败,请检查Vault是否启用！");
+        }
     }
 
 
