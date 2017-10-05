@@ -50,8 +50,10 @@ public class PluginMain extends JavaPlugin implements Listener {
     private final TulingRobot TLR = new TulingRobot();
     //配置项
     private final Properties cfg = new Properties();
-
+    //经济操作对象
     private Economy econ = null;
+    //是否启用收费功能
+    private int GetMoney = 0;
 
 
     /**
@@ -522,7 +524,10 @@ public class PluginMain extends JavaPlugin implements Listener {
         if(isTrue){
             if(Integer.getInteger(cfg.getProperty("Econ.Price")) > 0){
                 if(!setupEconomy()){
-                    getLogger().warning("经济前置Vault载入失败！请检查Vault是否正常载入");
+                    getLogger().warning("经济前置Vault载入失败！请检查Vault是否正常载入(收费系统将被关闭)");
+                }else{
+                    //赋值
+                    GetMoney = Integer.getInteger(cfg.getProperty("Econ.Price"));
                 }
             }
         }
@@ -536,14 +541,16 @@ public class PluginMain extends JavaPlugin implements Listener {
      */
     private boolean setupEconomy() {
         if (getServer().getPluginManager().getPlugin("Vault") == null) {
+            getLogger().warning("无法获取Vault插件对象");
             return false;
         }
         RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class);
         if (rsp == null) {
+            getLogger().warning("获取类对象失败");
             return false;
         }
+        //获取经济操作对象
         econ = rsp.getProvider();
-
         return econ != null;
     }
 
