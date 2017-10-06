@@ -58,7 +58,8 @@ public class PluginMain extends JavaPlugin implements Listener {
 
 
     /**
-     * 无聊的主方法
+     * 无聊的主方法.
+     * 目前暂不需要使用.
      * @param args 运行参数
      */
     public static void main(String[] args) {
