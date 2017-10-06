@@ -505,21 +505,31 @@ public class PluginMain extends JavaPlugin implements Listener {
      * @return 返回是否载入成功
      */
     private boolean LoadConfig() throws IOException {
+        //TODO:2017/10/06: 这里可能会因为配置文件在载入失败后保存了一份空的配置文件,然后读取出现null报错,尝试让读取失败后拒绝保存文件
         //获得插件数据文件夹
         File df = getDataFolder();
         //检查文件夹是否存在，或是否为文件
-        if(!df.exists() || df.isFile()){
+        if(!df.exists()){
             //是就删除，然后重新创建
+            if(!df.mkdir()){
+                getLogger().warning("插件数据文件夹创建失败！请手动创建【TulingRobot】文件夹");
+                return false;
+            }
+        }else if(df.isFile()){
             if(df.delete()){
                 if(!df.mkdir()){
                     getLogger().warning("插件数据文件夹创建失败！请手动创建【TulingRobot】文件夹");
                     return false;
                 }
+                //这里成功后会跳转到
             }else{
                 getLogger().warning("数据文件夹异常，清理失败！");
                 return false;
             }
         }
+        //位置 D1
+
+
         //指定配置文件路径获取File对象
         File configFile = new File(getDataFolder().getPath() + "/config.properties");
         //检查文件是否存在
@@ -559,10 +569,12 @@ public class PluginMain extends JavaPlugin implements Listener {
                 init_config = true;
                 onConfigLoad(false);
                 return false;
+            }else{
+                getLogger().warning("默认配置文件写出失败！");
+                onConfigLoad(false);
+                return false;
             }
         }
-        onConfigLoad(false);
-        return false;
     }
 
     /**
@@ -570,6 +582,7 @@ public class PluginMain extends JavaPlugin implements Listener {
      * @param isTrue 是否成功载入
      */
     private void onConfigLoad(boolean isTrue){
+        /*
         if(isTrue){
             if(Integer.getInteger(cfg.getProperty("Econ.Price")) > 0){
                 if(!setupEconomy()){
@@ -579,7 +592,7 @@ public class PluginMain extends JavaPlugin implements Listener {
                     GetMoney = Integer.getInteger(cfg.getProperty("Econ.Price"));
                 }
             }
-        }
+        */
     }
 
     /**
