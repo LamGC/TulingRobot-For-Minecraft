@@ -18,10 +18,12 @@ package net.lamgc.TulingPlugin;
 
 import com.google.gson.JsonObject;
 import net.milkbowl.vault.economy.Economy;
+import net.milkbowl.vault.economy.EconomyResponse;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.HandlerList;
@@ -149,6 +151,28 @@ public class PluginMain extends JavaPlugin implements Listener {
         if (cmd.getName().equalsIgnoreCase("robot") && args.length == 1) {
             if(!Switch){
                 sender.sendMessage("[插件] 机器人已停用！");
+                return true;
+            }
+            EconomyResponse er;
+            //如果需要收费
+            if(GetMoney > 0){
+                //收费代码
+                er = econ.depositPlayer((Player) sender, 0);
+                if(!er.transactionSuccess()){
+                    getLogger().warning("机器人调用扣费操作失败！");
+                    sender.sendMessage("[插件] 调用机器人时发生了异常！");
+                    return true;
+                }
+                if(er.balance >= GetMoney){
+                    er = econ.depositPlayer((Player) sender, GetMoney - (GetMoney * 2));
+                    if(!er.transactionSuccess()){
+                        getLogger().warning("机器人调用扣费操作失败！");
+                        sender.sendMessage("[插件] 调用机器人时发生了异常！");
+                        return true;
+                    }
+                }else{
+                    sender.sendMessage("你的Money不够呢！");
+                }
             }
             JsonObject rem;
             try {
@@ -181,6 +205,7 @@ public class PluginMain extends JavaPlugin implements Listener {
                 sender.sendMessage("[错误]" + TLR.getErrorString(code) + "(" + code + ")");
                 getLogger().warning("[错误]" + TLR.getErrorString(code) + "(" + code + ")");
             }
+            sender.sendMessage("[插件] 调用机器人已扣除费用: " + GetMoney);
             return true;
         } else
             //------------------------------机器人设置命令------------------------------
