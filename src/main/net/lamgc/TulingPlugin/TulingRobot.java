@@ -27,7 +27,6 @@ import java.io.IOException;
  * 图灵机器人Api
  * @author LamGC
  */
-@SuppressWarnings("WeakerAccess")
 public class TulingRobot {
 
     private String ApiKey;
@@ -94,7 +93,7 @@ public class TulingRobot {
                 "application/json"
         );
         //输出JsonString以检查是否正确
-        System.out.println("[调试] JsonString:" + re);
+        //System.out.println("[调试] JsonString:" + re);
         JsonElement rp = new JsonParser().parse(re);
         //如果不是JsonObject
         //返回Null

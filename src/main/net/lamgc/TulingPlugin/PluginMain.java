@@ -56,7 +56,7 @@ public class PluginMain extends JavaPlugin implements Listener {
     //经济操作对象
     private Economy econ = null;
     //是否启用收费功能
-    private int GetMoney = 0;
+    private double GetMoney = 0;
     //配置是否载入失败,失败后将不保存配置文件
     private boolean LoadConfigError = false;
 
@@ -94,7 +94,6 @@ public class PluginMain extends JavaPlugin implements Listener {
     @Override
     public void onLoad() {
         getLogger().info("插件载入中...");
-
         try {
             if(LoadConfig()) {
                 if (!LoadApiKey()) {
@@ -168,6 +167,7 @@ public class PluginMain extends JavaPlugin implements Listener {
                     sender.sendMessage("[插件] 调用机器人时发生了异常！");
                     return true;
                 }
+                sender.sendMessage("[插件] 调用机器人已扣除费用: " + GetMoney);
                 if(er.balance >= GetMoney){
                     er = econ.depositPlayer((Player) sender, GetMoney - (GetMoney * 2));
                     if(!er.transactionSuccess()){
@@ -176,7 +176,7 @@ public class PluginMain extends JavaPlugin implements Listener {
                         return true;
                     }
                 }else{
-                    sender.sendMessage("你的Money不够呢！");
+                    sender.sendMessage("[插件] 你的Money不够呢！");
                 }
             }
             JsonObject rem;
@@ -210,7 +210,6 @@ public class PluginMain extends JavaPlugin implements Listener {
                 sender.sendMessage("[错误]" + TLR.getErrorString(code) + "(" + code + ")");
                 getLogger().warning("[错误]" + TLR.getErrorString(code) + "(" + code + ")");
             }
-            sender.sendMessage("[插件] 调用机器人已扣除费用: " + GetMoney);
             return true;
         } else
             //------------------------------机器人设置命令------------------------------
@@ -581,17 +580,16 @@ public class PluginMain extends JavaPlugin implements Listener {
      */
     private void onConfigLoad(boolean isTrue){
         LoadConfigError = !isTrue;
-        /*
-        if(isTrue){
-            if(Integer.getInteger(cfg.getProperty("Econ.Price")) > 0){
-                if(!setupEconomy()){
+        if(isTrue) {
+            if (Double.parseDouble(cfg.getProperty("Econ.Price","0")) > 0) {
+                if (!setupEconomy()) {
                     getLogger().warning("经济前置Vault载入失败！请检查Vault是否正常载入(收费系统将被关闭)");
-                }else{
+                } else {
                     //赋值
-                    GetMoney = Integer.getInteger(cfg.getProperty("Econ.Price"));
+                    GetMoney = Double.parseDouble(cfg.getProperty("Econ.Price","0"));
                 }
             }
-        */
+        }
     }
 
     /**
