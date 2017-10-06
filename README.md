@@ -28,7 +28,7 @@
 <br/>
 
 ## 使用图灵机器人Api简易教程 ##
-在需要使用Api的类导入包:`import net.coding.lamgc.TulingRobot.TulingRobot`<br/>
+在需要使用Api的类导入包:`import net.lamgc.TulingPlugin.TulingRobot`<br/>
 然后new一个对象出来:`new TulingRobot(String ApiKey);` 或 `new TulingRobot();`<br/>
 使用`Robot(String info, String UserID)`方法调用机器人(ApiV1)即可
 

@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.coding.lamgc.TulingRobot;
+package net.lamgc.TulingPlugin;
 
 import com.google.gson.JsonObject;
 import net.milkbowl.vault.economy.Economy;
@@ -456,7 +456,7 @@ public class PluginMain extends JavaPlugin implements Listener {
     //---------------功能相关方法---------------
 
     /**
-     * 新的载入
+     * 新的载入.
      * @return ApiKey是否载入成功
      */
     private boolean LoadApiKey(){
