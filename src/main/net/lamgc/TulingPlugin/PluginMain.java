@@ -102,7 +102,6 @@ public class PluginMain extends JavaPlugin implements Listener {
                 }
             }else{
                 getLogger().warning("配置载入失败！");
-                LoadConfigError = true;
             }
         } catch (IOException e) {
             getLogger().warning("载入配置时发生异常：");
@@ -573,15 +572,6 @@ public class PluginMain extends JavaPlugin implements Listener {
             init_config = true;
             onConfigLoad(false);
             return false;
-            /*
-            if(config.read(b) == -1){
-
-            }else{
-                getLogger().warning("默认配置文件写出失败！");
-                onConfigLoad(false);
-                return false;
-            }
-            */
         }
     }
 
@@ -590,6 +580,7 @@ public class PluginMain extends JavaPlugin implements Listener {
      * @param isTrue 是否成功载入
      */
     private void onConfigLoad(boolean isTrue){
+        LoadConfigError = !isTrue;
         /*
         if(isTrue){
             if(Integer.getInteger(cfg.getProperty("Econ.Price")) > 0){
