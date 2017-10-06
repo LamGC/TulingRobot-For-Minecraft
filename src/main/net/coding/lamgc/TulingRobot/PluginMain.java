@@ -99,7 +99,7 @@ public class PluginMain extends JavaPlugin implements Listener {
             getLogger().warning("载入配置时发生异常：");
             e.printStackTrace();
         }
-        getLogger().info("插件已就绪(Version:V" + Plugin_Version + ")");
+        getLogger().info("插件已就绪(Version: V" + Plugin_Version + ")");
     }
 
     /**
@@ -147,13 +147,13 @@ public class PluginMain extends JavaPlugin implements Listener {
         //如果是调用机器人的命令
         if (cmd.getName().equalsIgnoreCase("robot") && args.length == 1) {
             if(!Switch){
-                sender.sendMessage("机器人已停用！");
+                sender.sendMessage("[插件] 机器人已停用！");
             }
             JsonObject rem;
             try {
                 rem = TLR.Robot(args[0], sender.getName());
             } catch (IOException e) {
-                sender.sendMessage("调用机器人时发生一个异常！详细信息请查看服务器控制台。");
+                sender.sendMessage("[插件] 调用机器人时发生一个异常！详细信息请查看服务器控制台。");
                 getLogger().warning("调用机器人时发生了异常，信息如下:");
                 e.printStackTrace();
                 return true;
