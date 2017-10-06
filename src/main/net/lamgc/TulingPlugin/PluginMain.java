@@ -57,6 +57,11 @@ public class PluginMain extends JavaPlugin implements Listener {
     private Economy econ = null;
     //是否启用收费功能
     private int GetMoney = 0;
+    //配置是否载入失败,失败后将不保存配置文件
+    private boolean LoadConfigError = false;
+
+
+
 
 
     /**
@@ -97,6 +102,7 @@ public class PluginMain extends JavaPlugin implements Listener {
                 }
             }else{
                 getLogger().warning("配置载入失败！");
+                LoadConfigError = true;
             }
         } catch (IOException e) {
             getLogger().warning("载入配置时发生异常：");
@@ -527,9 +533,6 @@ public class PluginMain extends JavaPlugin implements Listener {
                 return false;
             }
         }
-        //位置 D1
-
-
         //指定配置文件路径获取File对象
         File configFile = new File(getDataFolder().getPath() + "/config.properties");
         //检查文件是否存在
@@ -555,25 +558,30 @@ public class PluginMain extends JavaPlugin implements Listener {
                 return false;
             }
             byte[] b = new byte[config.available()];
-            if(config.read(b) == config.available()){
-                FileOutputStream fos = new FileOutputStream(configFile);
-                //写入文件
-                fos.write(b);
-                //刷新缓冲区
-                fos.flush();
-                //关闭输出流
-                fos.close();
-                //读入配置
-                cfg.load(new InputStreamReader(new FileInputStream(configFile),"UTF-8"));
-                getLogger().warning("config.properties文件不存在，插件已自动创建，进行设置后使用【/setRobot reload】重载配置");
-                init_config = true;
-                onConfigLoad(false);
-                return false;
+            config.read(b);
+            config.close();
+            FileOutputStream fos = new FileOutputStream(configFile);
+            //写入文件
+            fos.write(b);
+            //刷新缓冲区
+            fos.flush();
+            //关闭输出流
+            fos.close();
+            //读入配置
+            cfg.load(new InputStreamReader(new FileInputStream(configFile),"UTF-8"));
+            getLogger().warning("config.properties文件不存在，插件已自动创建，进行设置后使用【/setRobot reload】重载配置");
+            init_config = true;
+            onConfigLoad(false);
+            return false;
+            /*
+            if(config.read(b) == -1){
+
             }else{
                 getLogger().warning("默认配置文件写出失败！");
                 onConfigLoad(false);
                 return false;
             }
+            */
         }
     }
 
@@ -640,6 +648,10 @@ public class PluginMain extends JavaPlugin implements Listener {
      * @throws IOException 因为文件或写入出问题会抛出的异常
      */
     private void SaveConfig() throws IOException {
+        if(LoadConfigError){
+            //不做出保存操作，而是重新写出
+            return;
+        }
         cfg.store(new FileOutputStream(new File(getDataFolder().getPath() + "/config.properties")),"TulingRobot_V" + Plugin_Version + " - ConfigFile");
     }
 
