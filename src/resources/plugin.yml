@@ -1,6 +1,7 @@
 name: TulingRobot
 main: net.lamgc.TulingPlugin.PluginMain
 version: 1.1.4
+depend: [Vault]
 author: LamGC
 commands:
      robot:

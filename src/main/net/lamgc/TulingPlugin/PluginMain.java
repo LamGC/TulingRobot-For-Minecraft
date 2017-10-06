@@ -117,6 +117,14 @@ public class PluginMain extends JavaPlugin implements Listener {
         if(cfg.getProperty("Robot.Switch").equalsIgnoreCase("true")){
             Switch = true;
         }
+        if (Double.parseDouble(cfg.getProperty("Econ.Price","0")) > 0) {
+            if (!setupEconomy()) {
+                getLogger().warning("经济前置Vault载入失败！请检查Vault是否正常载入(收费系统将被关闭)");
+            } else {
+                //赋值
+                GetMoney = Double.parseDouble(cfg.getProperty("Econ.Price","0"));
+            }
+        }
         //注册事件
         getServer().getPluginManager().registerEvents(this, this);
         getLogger().info("插件已启用");
@@ -158,8 +166,8 @@ public class PluginMain extends JavaPlugin implements Listener {
                 return true;
             }
             EconomyResponse er;
-            //如果需要收费
-            if(GetMoney > 0){
+            //如果需要收费(而且是个玩家233)
+            if(GetMoney > 0 && sender instanceof Player){
                 //收费代码
                 er = econ.depositPlayer((Player) sender, 0);
                 if(!er.transactionSuccess()){
@@ -250,6 +258,7 @@ public class PluginMain extends JavaPlugin implements Listener {
                     }
                 } else
                     //两个参数的设置
+                //TODO:2017/10/07: 记得添加修改金额的命令！
                     if(args.length == 2){
                     //设置聊天前缀
                     if (args[0].equalsIgnoreCase("prefix")) {
@@ -581,6 +590,7 @@ public class PluginMain extends JavaPlugin implements Listener {
     private void onConfigLoad(boolean isTrue){
         LoadConfigError = !isTrue;
         if(isTrue) {
+            /*
             if (Double.parseDouble(cfg.getProperty("Econ.Price","0")) > 0) {
                 if (!setupEconomy()) {
                     getLogger().warning("经济前置Vault载入失败！请检查Vault是否正常载入(收费系统将被关闭)");
@@ -589,6 +599,7 @@ public class PluginMain extends JavaPlugin implements Listener {
                     GetMoney = Double.parseDouble(cfg.getProperty("Econ.Price","0"));
                 }
             }
+            */
         }
     }
 
