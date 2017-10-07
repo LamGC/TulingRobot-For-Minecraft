@@ -26,10 +26,8 @@
 与机器人聊天:`/robot [Message(消息)]`<br/>
 设置机器人:`/setrobot [Option(选项)] <args(参数)...>`<br/>
 其中，机器人设置有以下选项:
- - setkey - 设置新的机器人ApiKey
- - reload - 重载配置，目前仅重载ApiKey
-<br/>
-
+ - (选项加太多了，插件中用`setrobot help`命令查看吧QAQ)
+ 
 ## 使用图灵机器人Api简易教程 ##
 在需要使用Api的类导入包:`import net.lamgc.TulingPlugin.TulingRobot`<br/>
 然后new一个对象出来:`new TulingRobot(String ApiKey);` 或 `new TulingRobot();`<br/>
