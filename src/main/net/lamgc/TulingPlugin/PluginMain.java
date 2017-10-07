@@ -70,21 +70,6 @@ public class PluginMain extends JavaPlugin implements Listener {
      */
     public static void main(String[] args) {
         System.out.println("请把本Jar文件放入服务器目录下plugins文件夹即可");
-        /*
-        JsonObject sj = new JsonObject();
-        sj.addProperty("key", "6dffba1e83cdb5d7aebc8ad6b320cf5b");
-        sj.addProperty("info","Test");
-        sj.addProperty("userid","TUD");
-        System.out.println(HttpRequest.sendPost(TLR.getApiUrl(true),sj.toString()));
-        */
-
-        //JsonObject rj = TLR.Robot("看新闻","Tud");
-        /*
-        System.out.println(rj.toString());
-        System.out.println(rj.get("code").getAsInt());
-        System.out.println(rj.get("text").getAsString());
-        System.out.println(rj.get("url").getAsString());
-        */
     }
 
     /**
