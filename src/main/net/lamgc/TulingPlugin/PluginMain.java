@@ -44,9 +44,11 @@ public class PluginMain extends JavaPlugin implements Listener {
 
     //插件相关信息
     private final String Plugin_Version = "1.1.4";
+
+
     //是否初始化了配置文件
     private boolean init_config = false;
-    //开关
+    //机器人开关
     private boolean Switch;
 
     //图灵机器人实例
@@ -57,11 +59,8 @@ public class PluginMain extends JavaPlugin implements Listener {
     private Economy econ = null;
     //是否启用收费功能
     private double GetMoney = 0;
-    //配置是否载入失败,失败后将不保存配置文件
+    //配置是否载入失败,失败后将不保存配置文件,不过可以通过reload重新载入配置
     private boolean LoadConfigError = false;
-
-
-
 
 
     /**
