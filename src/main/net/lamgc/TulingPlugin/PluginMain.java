@@ -113,16 +113,8 @@ public class PluginMain extends JavaPlugin implements Listener {
      */
     @Override
     public void onEnable() {
-        if(cfg.getProperty("Robot.Switch").equalsIgnoreCase("true")){
+        if(cfg.getProperty("Robot.Switch","false").equalsIgnoreCase("true")){
             Switch = true;
-        }
-        if (Double.parseDouble(cfg.getProperty("Econ.Price","0")) > 0) {
-            if (!setupEconomy()) {
-                getLogger().warning("经济前置Vault载入失败！请检查Vault是否正常载入(收费系统将被关闭)");
-            } else {
-                //赋值
-                GetMoney = Double.parseDouble(cfg.getProperty("Econ.Price","0"));
-            }
         }
         //注册事件
         getServer().getPluginManager().registerEvents(this, this);
@@ -314,7 +306,19 @@ public class PluginMain extends JavaPlugin implements Listener {
                             }
                             sender.sendMessage("已成功修改自由聊天模式！");
                             return true;
+                    }else
+                        if(args[0].equalsIgnoreCase("test")){
+                        if(args[1].equalsIgnoreCase("1")){
+                            getLogger().info("测试1 开始执行");
+                            if(setupEconomy()){
+                                getLogger().info("Vault连接成功");
+                            }else{
+                                getLogger().warning("Vault连接失败");
+                            }
                         }
+
+                        return true;
+                    }
                 } else
                     //重载配置
                     if (args.length == 1) {
@@ -415,23 +419,23 @@ public class PluginMain extends JavaPlugin implements Listener {
         if(!Switch){
             return;
         }
+        //前缀，如果需要
+        //前缀如果不为空
+        String prefix = cfg.getProperty("Dialogue.Trigger_Prefix","");
+        //getLogger().info("[调试] 触发前缀: " + prefix);
+        if(!prefix.equalsIgnoreCase("")){
+            //getLogger().info("[调试] " + "前缀在信息的位置：" + event.getMessage().indexOf(prefix));
+            //如果发现了前缀(在开头)
+            if(event.getMessage().indexOf(prefix) != 0){
+                //不处理非指定前缀消息
+                //getLogger().info("[调试] " + "前缀不正确，放弃处理");
+                return;
+            }
+        }
+
         //异步处理方法
         new Thread(() -> {
             //getLogger().info("[调试] 处理线程已启动，开始异步处理...");
-            //前缀，如果需要
-            //前缀如果不为空
-            String prefix = cfg.getProperty("Dialogue.Trigger_Prefix","");
-            //getLogger().info("[调试] 触发前缀: " + prefix);
-            if(!prefix.equalsIgnoreCase("")){
-                //getLogger().info("[调试] " + "前缀在信息的位置：" + event.getMessage().indexOf(prefix));
-                //如果发现了前缀(在开头)
-                if(event.getMessage().indexOf(prefix) != 0){
-                    //不处理非指定前缀消息
-                    //getLogger().info("[调试] " + "前缀不正确，放弃处理");
-                    return;
-                }
-            }
-
             //准备好一个JsonObject变量用来获取机器人返回值
             JsonObject rj;
             try {
@@ -589,7 +593,6 @@ public class PluginMain extends JavaPlugin implements Listener {
     private void onConfigLoad(boolean isTrue){
         LoadConfigError = !isTrue;
         if(isTrue) {
-            /*
             if (Double.parseDouble(cfg.getProperty("Econ.Price","0")) > 0) {
                 if (!setupEconomy()) {
                     getLogger().warning("经济前置Vault载入失败！请检查Vault是否正常载入(收费系统将被关闭)");
@@ -598,7 +601,6 @@ public class PluginMain extends JavaPlugin implements Listener {
                     GetMoney = Double.parseDouble(cfg.getProperty("Econ.Price","0"));
                 }
             }
-            */
         }
     }
 
