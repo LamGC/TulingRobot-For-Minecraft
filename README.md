@@ -16,6 +16,9 @@
 >`/setrobot setkey [机器人Key] -r` <br/>
 >如无异常，插件将会保存新的ApiKey到文件并重载ApiKey。
 
+>注意一下！如果插件在初始化配置时出错，请尝试删除[TulingRobot]目录及目录内所有文件，使用`setrobot reload`命令重新初始化插件！
+>如任然无法初始化插件，使用zip解压工具，从插件jar内解压`config.properties`文件到`plugins/TulingRobot`目录中并使用`setrobot reload`命令重载配置文件
+
 至此，插件已配置完成！
 
 ## 使用插件 ##
