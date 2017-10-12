@@ -293,14 +293,6 @@ public class PluginMain extends JavaPlugin implements Listener {
                             return true;
                     }else
                         if(args[0].equalsIgnoreCase("test")){
-                        if(args[1].equalsIgnoreCase("1")){
-                            getLogger().info("测试1 开始执行");
-                            if(setupEconomy()){
-                                getLogger().info("Vault连接成功");
-                            }else{
-                                getLogger().warning("Vault连接失败");
-                            }
-                        }
 
                         return true;
                     }
