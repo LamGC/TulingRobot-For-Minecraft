@@ -201,7 +201,7 @@ public class PluginMain extends JavaPlugin implements Listener {
                 //getLogger().info("[调试] 进入机器人设置");
                 //getLogger().info("[调试] args:" + Arrays.toString(args));
                 //两个参数，则为修改ApiKey而不重载
-                if (args[0].equalsIgnoreCase("apikey") && args.length <= 3) {
+                if (args[0].equalsIgnoreCase("apikey") && args.length > 2) {
                     //getLogger().info("[调试] 进入修改ApiKey");
                     //标准图灵机器人ApiKey是32位长度的
                     if (args[1].length() == 32) {
