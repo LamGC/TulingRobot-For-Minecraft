@@ -330,7 +330,7 @@ public class PluginMain extends JavaPlugin implements Listener {
                                     sender.sendMessage("已成功载入配置");
                                 } else {
                                     getLogger().info("载入配置失败");
-                                    sender.sendMessage("载入配置失败");
+                                    sender.sendMessage("载入配置失败,尝试使用 setrobot reload 重载配置");
                                 }
                             } catch (IOException e) {
                                 getLogger().info("载入配置时发生异常：");
@@ -368,8 +368,9 @@ public class PluginMain extends JavaPlugin implements Listener {
                 String u =
                         "用法:/setrobot [选项] <参数...>"                                                                           + "\n" +
                         "    选项(支持小写):"                                                                                       + "\n" +
+                        "        Switch      - 设置机器人开关"                                                                      + "\n" +
                         "        ApiKey      - 设置新的ApiKey"                                                                      + "\n" +
-                        "                             【命令用法：/setrobot setkey {ApiKey} <--reload/-r>】"                        + "\n" +
+                        "                             【命令用法：/setrobot apikey {ApiKey} <--reload/-r>】"                        + "\n" +
                         "        RobotName   - 设置新的机器人名称(自由聊天模式有效)"                                                + "\n" +
                         "        Prefix      - 设置自由聊天的前缀(设置为【-r】可删除前缀)"                                          + "\n" +
                         "        ChatTrigger - 设置自由聊天模式开关，true为开启，false或其他字符为关闭"                             + "\n" +
