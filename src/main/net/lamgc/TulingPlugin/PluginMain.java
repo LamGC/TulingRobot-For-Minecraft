@@ -17,20 +17,15 @@
 package net.lamgc.TulingPlugin;
 
 import com.google.gson.JsonObject;
-import net.milkbowl.vault.economy.Economy;
-import net.milkbowl.vault.economy.EconomyResponse;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
-import org.bukkit.event.server.PluginDisableEvent;
-import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.*;
@@ -55,10 +50,6 @@ public class PluginMain extends JavaPlugin implements Listener {
     private final TulingRobot TLR = new TulingRobot();
     //配置项
     private final Properties cfg = new Properties();
-    //经济操作对象
-    private Economy econ = null;
-    //是否启用收费功能
-    private double GetMoney = 0;
     //配置是否载入失败,失败后将不保存配置文件,不过可以通过reload重新载入配置
     private boolean LoadConfigError = false;
 
@@ -141,28 +132,6 @@ public class PluginMain extends JavaPlugin implements Listener {
                 sender.sendMessage("[插件] 机器人已停用！");
                 return true;
             }
-            EconomyResponse er;
-            //如果需要收费(而且是个玩家233)
-            if(GetMoney > 0 && sender instanceof Player){
-                //收费代码
-                er = econ.depositPlayer((Player) sender, 0);
-                if(!er.transactionSuccess()){
-                    getLogger().warning("机器人调用扣费操作失败！");
-                    sender.sendMessage("[插件] 调用机器人时发生了异常！");
-                    return true;
-                }
-                sender.sendMessage("[插件] 调用机器人已扣除费用: " + GetMoney);
-                if(er.balance >= GetMoney){
-                    er = econ.depositPlayer((Player) sender, GetMoney - (GetMoney * 2));
-                    if(!er.transactionSuccess()){
-                        getLogger().warning("机器人调用扣费操作失败！");
-                        sender.sendMessage("[插件] 调用机器人时发生了异常！");
-                        return true;
-                    }
-                }else{
-                    sender.sendMessage("[插件] 你的Money不够呢！");
-                }
-            }
             JsonObject rem;
             try {
                 rem = TLR.Robot(args[0], sender.getName());
@@ -234,7 +203,6 @@ public class PluginMain extends JavaPlugin implements Listener {
                     }
                 } else
                     //两个参数的设置
-                //TODO:2017/10/07: 记得添加修改金额的命令！
                     if(args.length == 2){
                     //设置聊天前缀
                     if (args[0].equalsIgnoreCase("prefix")) {
@@ -293,9 +261,7 @@ public class PluginMain extends JavaPlugin implements Listener {
                             return true;
                     }else
                         if(args[0].equalsIgnoreCase("test")){
-                        //进入测试
-
-
+                        //可构建版不需要测试
                         return true;
                     }
                 } else
@@ -462,19 +428,6 @@ public class PluginMain extends JavaPlugin implements Listener {
         }).start();
     }
 
-    /**
-     * 当有插件禁用时触发.
-     * 用来防止Vault被卸载后出现异常.
-     * @param event 事件参数
-     */
-    @EventHandler(priority = EventPriority.HIGHEST)
-    public void onPluginDisable(PluginDisableEvent event){
-        if(!setupEconomy()){
-            getLogger().warning("经济系统重载失败,请检查Vault是否启用！");
-        }
-    }
-
-
     //---------------功能相关方法---------------
 
     /**
@@ -572,37 +525,6 @@ public class PluginMain extends JavaPlugin implements Listener {
      */
     private void onConfigLoad(boolean isTrue){
         LoadConfigError = !isTrue;
-        if(isTrue) {
-            if (Double.parseDouble(cfg.getProperty("Econ.Price","0")) > 0) {
-                if (!setupEconomy()) {
-                    getLogger().warning("经济前置Vault载入失败！请检查Vault是否正常载入(收费系统将被关闭)");
-                } else {
-                    //赋值
-                    GetMoney = Double.parseDouble(cfg.getProperty("Econ.Price","0"));
-                }
-            }
-        }
-    }
-
-    /**
-     * 加载前置插件(Vault)
-     * <p/>
-     * Vault作者提供的方法-w-
-     * @return 是否成功载入
-     */
-    private boolean setupEconomy() {
-        if (getServer().getPluginManager().getPlugin("Vault") == null) {
-            getLogger().warning("无法获取Vault插件对象");
-            return false;
-        }
-        RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class);
-        if (rsp == null) {
-            getLogger().warning("获取类对象失败");
-            return false;
-        }
-        //获取经济操作对象
-        econ = rsp.getProvider();
-        return econ != null;
     }
 
     /**
