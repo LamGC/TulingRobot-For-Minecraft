@@ -293,6 +293,8 @@ public class PluginMain extends JavaPlugin implements Listener {
                             return true;
                     }else
                         if(args[0].equalsIgnoreCase("test")){
+                        //进入测试
+
 
                         return true;
                     }
@@ -347,7 +349,7 @@ public class PluginMain extends JavaPlugin implements Listener {
                             }else{
                                 str = "\n" +
                                         "机器人状态: " + (Switch ? "已启用" : "已停用") + "\n" +
-                                        "机器人ApiKey为敏感项，请前往服务器控制台执行本命令查询。" + "\n" +
+                                        "机器人ApiKey为敏感项，请前往服务器控制台执行本命令查询" + "\n" +
                                         "机器人名称: " + cfg.getProperty("Robot.Name") + "\n" +
                                         "自由聊天模式状态: " + ct2 + "(值: " + ct + ")" + "\n" +
                                         "聊天触发前缀: " + tp1;
