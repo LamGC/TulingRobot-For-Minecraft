@@ -38,7 +38,7 @@ import java.util.Properties;
 public class PluginMain extends JavaPlugin implements Listener {
 
     //插件相关信息
-    private final String Plugin_Version = "1.1.4";
+    private final String Plugin_Version = "1.1.5";
 
 
     //是否初始化了配置文件
