@@ -49,7 +49,7 @@ public class PluginMain extends JavaPlugin implements Listener {
     //是否初始化了配置文件
     private boolean init_config = false;
     //机器人开关
-    private boolean Switch;
+    private boolean Switch = false;
 
     //图灵机器人实例
     private final TulingRobot TLR = new TulingRobot();
@@ -480,7 +480,6 @@ public class PluginMain extends JavaPlugin implements Listener {
         }
     }
 
-
     //---------------功能相关方法---------------
 
     /**
@@ -577,10 +576,15 @@ public class PluginMain extends JavaPlugin implements Listener {
      * @param isTrue 是否成功载入
      */
     private void onConfigLoad(boolean isTrue){
+        //置配置文件载入状态
         LoadConfigError = !isTrue;
+        //如果为真
         if(isTrue) {
+            //是否启用收费功能
             if (Double.parseDouble(cfg.getProperty("Econ.Price","0")) > 0) {
+                //经济系统载入失败
                 if (!setupEconomy()) {
+                    //E1
                     getLogger().warning("经济前置Vault载入失败！请检查Vault是否正常载入(收费系统将被关闭)");
                 } else {
                     //赋值
