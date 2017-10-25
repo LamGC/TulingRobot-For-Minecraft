@@ -80,7 +80,9 @@ public class TulingRobot {
         //加入参数
         sj.addProperty("key", ApiKey);
         sj.addProperty("info",msg);
-        sj.addProperty("userid",UserID);
+        if(UserID != null || !UserID.equalsIgnoreCase("")){
+            sj.addProperty("userid",UserID);
+        }
         //下面是Http Get代码，已弃用
         //Post爆炸，先用Get做测试
         //String ss = "key=" + ApiKey + "&info=" + msg + "&userid=" + UserID;
