@@ -36,6 +36,13 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.io.*;
 import java.util.Properties;
 
+/*
+1.1.6版本计划
+添加Vault
+添加每日一句【感谢“黎明”提供接口】
+...
+ */
+
 /**
  * 插件及程序的主类
  * @author LamGC
@@ -43,7 +50,7 @@ import java.util.Properties;
 public class PluginMain extends JavaPlugin implements Listener {
 
     //插件相关信息
-    private final String Plugin_Version = "1.1.5";
+    private final String Plugin_Version = "1.1.6";
 
 
     //是否初始化了配置文件
