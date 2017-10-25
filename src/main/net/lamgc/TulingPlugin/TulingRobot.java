@@ -19,8 +19,8 @@ package net.lamgc.TulingPlugin;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.sun.istack.internal.NotNull;
 import wzh.http.HttpRequest;
-
 import java.io.IOException;
 
 /**
@@ -40,7 +40,7 @@ public class TulingRobot {
      * @param ApiKey Api调用Key
      * @apiNote 创建一个图灵机器人类对象
      */
-    public TulingRobot(String ApiKey){
+    public TulingRobot(@NotNull String ApiKey){
         SetApiKey(ApiKey);
     }
 
@@ -48,10 +48,9 @@ public class TulingRobot {
      * 设置/修改 Api调用Key
      * @param ApiKey 调用Api所需Key，请确保Key有效
      */
-    public void SetApiKey(String ApiKey){
+    public void SetApiKey(@NotNull String ApiKey){
         this.ApiKey = ApiKey;
     }
-
 
     /**
      * 取图灵机器人Api地址
@@ -75,7 +74,7 @@ public class TulingRobot {
      * @return 返回HashMap对象
      *          请注意检查HashMap，以免造成因无对应值导致的错误
      */
-    public JsonObject Robot(String msg, String UserID) throws IOException {
+    public JsonObject Robot(@NotNull String msg, String UserID) throws IOException {
         //创建JsonObject参数类
         JsonObject sj = new JsonObject();
         //加入参数
@@ -103,11 +102,47 @@ public class TulingRobot {
     }
 
     /**
+     * 可直接调用的机器人方法(ApiV1)(Http Post)
+     * @param ApiKey 调用机器人的ApiKey
+     * @param msg 消息
+     * @param UserID 用户标识，如无需要可填Null/空
+     * @return 调用返回内容JsonObject
+     */
+    public static JsonObject sRobot(@NotNull String ApiKey, @NotNull String msg, String UserID) throws IOException {
+        //创建JsonObject参数类
+        JsonObject sj = new JsonObject();
+        //加入参数
+        sj.addProperty("key", ApiKey);
+        sj.addProperty("info",msg);
+        if(UserID != null || !UserID.equalsIgnoreCase("")){
+            sj.addProperty("userid",UserID);
+        }
+        //下面是Http Get代码，已弃用
+        //Post爆炸，先用Get做测试
+        //String ss = "key=" + ApiKey + "&info=" + msg + "&userid=" + UserID;
+        //System.out.println("[调试] 参数:" + ss);
+        //String re = HttpRequest.sendGet(ApiV1_Url,new String(ss.getBytes(),"UTF-8"));
+        String re = HttpRequest.sendPost(
+                "http://www.tuling123.com/openapi/api",
+                sj.toString(),
+                "application/json"
+        );
+        //输出JsonString以检查是否正确
+        //System.out.println("[调试] JsonString:" + re);
+        JsonElement rp = new JsonParser().parse(re);
+        //如果不是JsonObject
+        //返回Null
+        if(!rp.isJsonObject()){ return null; }
+        //正常就返回JsonObject对象
+        return rp.getAsJsonObject();
+    }
+
+    /**
      * 根据错误代码获取文本，如果不是错误文本，将返回空
      * @param Code 返回码
      * @return 如果返回码为错误码，返回错误文本，否则返回空文本( != Null)
      */
-    public String getErrorString(int Code){
+    public String getErrorString(@NotNull int Code){
         switch (Code) {
             case TLCode.Error_KeyError:
                 return "Key错误";
