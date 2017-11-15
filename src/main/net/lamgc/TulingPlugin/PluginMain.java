@@ -265,7 +265,10 @@ public class PluginMain extends JavaPlugin implements Listener {
                         if (args[0].equalsIgnoreCase("robotname")) {
                             //getLogger().info("[调试] 进入修改机器人名称");
                             try {
-                                putConfig("Robot.Name", args[1]);
+                                putConfig(
+                                        "Robot.Name",
+                                        args[1].equalsIgnoreCase("-r") ? "" : args[1]
+                                );
                             } catch (IOException e) {
                                 sender.sendMessage("修改配置时发生异常，详细信息请查看服务器控制台!");
                                 getLogger().warning("修改配置时发生异常:");
@@ -288,7 +291,7 @@ public class PluginMain extends JavaPlugin implements Listener {
                             try {
                                 putConfig(
                                         "Dialogue.Chat_Trigger",
-                                        args[1]
+                                        cfg.getProperty("Dialogue.Chat_Trigger").equalsIgnoreCase("true")?"false":"true"
                                 );
                             } catch (IOException e) {
                                 sender.sendMessage("修改配置时发生异常，详细信息请查看服务器控制台!");
@@ -375,14 +378,14 @@ public class PluginMain extends JavaPlugin implements Listener {
                 String u =
                         "用法:/setrobot [选项] <参数...>"                                                                           + "\n" +
                         "    选项(支持小写):"                                                                                       + "\n" +
-                        "        Switch      - 设置机器人开关"                                                                      + "\n" +
+                        "        Switch      - 切换机器人开关"                                                                      + "\n" +
                         "        ApiKey      - 设置新的ApiKey"                                                                      + "\n" +
                         "                             【命令用法：/setrobot apikey {ApiKey} <--reload/-r>】"                        + "\n" +
                         "        RobotName   - 设置新的机器人名称(自由聊天模式有效)"                                                + "\n" +
                         "        Prefix      - 设置自由聊天的前缀(设置为【-r】可删除前缀)"                                          + "\n" +
-                        "        ChatTrigger - 设置自由聊天模式开关，true为开启，false或其他字符为关闭"                             + "\n" +
+                        "        ChatTrigger - 切换自由聊天模式开关"                                                                + "\n" +
                         "        Check       - 查看所有设置项的值(功能状态)"                                                        + "\n" +
-                        "        reload      - 重载设置"                            ;
+                        "        reload      - 重载设置"                                                                            ;
                 sender.sendMessage(u);
                 return true;
         }
