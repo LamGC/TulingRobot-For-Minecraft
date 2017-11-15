@@ -133,7 +133,7 @@ public class PluginMain extends JavaPlugin implements Listener {
 
     /**
      * 命令处理方法
-     * @param sender 发送者，可强转为 [Player] 类型
+     * @param sender 发送者，可强转为 [Player] 或 [ConsoleCommandSender] 类型
      * @param cmd    命令首
      * @param label  命令缩写(不太清楚怎么用)
      * @param args   命令参数(和main的args参数一样)
