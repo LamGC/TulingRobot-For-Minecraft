@@ -35,6 +35,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.*;
 import java.util.Properties;
+import java.util.logging.Logger;
 
 /*
 1.1.6版本计划
@@ -62,6 +63,8 @@ public class PluginMain extends JavaPlugin implements Listener {
     private final TulingRobot TLR = new TulingRobot();
     //配置项
     private final Properties cfg = new Properties();
+    //日志记录器
+    private Logger Log = getLogger();
     //经济操作对象
     private Economy econ = null;
     //是否启用收费功能
@@ -84,20 +87,20 @@ public class PluginMain extends JavaPlugin implements Listener {
      */
     @Override
     public void onLoad() {
-        getLogger().info("插件载入中...");
+        Log.info("插件载入中...");
         try {
             if(LoadConfig()) {
                 if (!LoadApiKey()) {
-                    getLogger().warning("ApiKey载入失败！");
+                    Log.warning("ApiKey载入失败！");
                 }
             }else{
-                getLogger().warning("配置载入失败！");
+                Log.warning("配置载入失败！");
             }
         } catch (IOException e) {
-            getLogger().warning("载入配置时发生异常：");
+            Log.warning("载入配置时发生异常：");
             e.printStackTrace();
         }
-        getLogger().info("插件已就绪(Version: V" + Plugin_Version + ")");
+        Log.info("插件已就绪(Version: V" + Plugin_Version + ")");
     }
 
     /**
@@ -110,7 +113,7 @@ public class PluginMain extends JavaPlugin implements Listener {
         }
         //注册事件
         getServer().getPluginManager().registerEvents(this, this);
-        getLogger().info("插件已启用");
+        Log.info("插件已启用");
     }
 
     /**
@@ -122,13 +125,13 @@ public class PluginMain extends JavaPlugin implements Listener {
             try {
                 SaveConfig();
             } catch (IOException e) {
-                getLogger().warning("保存配置时发生异常：");
+                Log.warning("保存配置时发生异常：");
                 e.printStackTrace();
             }
         }
         //停用插件时注销事件监听器
         HandlerList.unregisterAll((Listener) this);
-        getLogger().info("插件已停用");
+        Log.info("插件已停用");
     }
 
     /**
@@ -154,7 +157,7 @@ public class PluginMain extends JavaPlugin implements Listener {
                 //收费代码
                 er = econ.depositPlayer((Player) sender, 0);
                 if(!er.transactionSuccess()){
-                    getLogger().warning("机器人调用扣费操作失败！");
+                    Log.warning("机器人调用扣费操作失败！");
                     sender.sendMessage("[插件] 调用机器人时发生了异常！");
                     return true;
                 }
@@ -162,7 +165,7 @@ public class PluginMain extends JavaPlugin implements Listener {
                 if(er.balance >= GetMoney){
                     er = econ.depositPlayer((Player) sender, GetMoney - (GetMoney * 2));
                     if(!er.transactionSuccess()){
-                        getLogger().warning("机器人调用扣费操作失败！");
+                        Log.warning("机器人调用扣费操作失败！");
                         sender.sendMessage("[插件] 调用机器人时发生了异常！");
                         return true;
                     }
@@ -175,13 +178,13 @@ public class PluginMain extends JavaPlugin implements Listener {
                 rem = TLR.Robot(args[0], sender.getName());
             } catch (IOException e) {
                 sender.sendMessage("[插件] 调用机器人时发生一个异常！详细信息请查看服务器控制台。");
-                getLogger().warning("调用机器人时发生了异常，信息如下:");
+                Log.warning("调用机器人时发生了异常，信息如下:");
                 e.printStackTrace();
                 return true;
             }
             //Null检查
             if (rem == null) {
-                getLogger().warning("调用机器人失败！(调用返回不是合法Json)");
+                Log.warning("调用机器人失败！(调用返回不是合法Json)");
                 sender.sendMessage("[错误] 机器人调用失败！");
                 return true;
             }
@@ -199,39 +202,39 @@ public class PluginMain extends JavaPlugin implements Listener {
             } else if (code >= TulingRobot.TLCode.Error_KeyError) {
                 //错误信息
                 sender.sendMessage("[错误]" + TLR.getErrorString(code) + "(" + code + ")");
-                getLogger().warning("[错误]" + TLR.getErrorString(code) + "(" + code + ")");
+                Log.warning("[错误]" + TLR.getErrorString(code) + "(" + code + ")");
             }
             return true;
         } else
             //------------------------------机器人设置命令------------------------------
             if (cmd.getName().equalsIgnoreCase("setrobot") && args.length >= 1) {
-                //getLogger().info("[调试] 进入机器人设置");
-                //getLogger().info("[调试] args:" + Arrays.toString(args));
+                //Log.info("[调试] 进入机器人设置");
+                //Log.info("[调试] args:" + Arrays.toString(args));
                 //两个参数，则为修改ApiKey而不重载
                 if (args[0].equalsIgnoreCase("apikey") && args.length > 2) {
-                    //getLogger().info("[调试] 进入修改ApiKey");
+                    //Log.info("[调试] 进入修改ApiKey");
                     //标准图灵机器人ApiKey是32位长度的
                     if (args[1].length() == 32) {
                         //更改ApiKey
                         try {
                             SetApiKey(args[1]);
                             sender.sendMessage("已成功修改ApiKey");
-                            getLogger().info("ApiKey已修改，新ApiKey:[" + args[1] + "]");
+                            Log.info("ApiKey已修改，新ApiKey:[" + args[1] + "]");
                             if (args.length == 3 && args[2].equalsIgnoreCase("--reload") || args[2].equalsIgnoreCase("-r")) {
                                 //重新载入配置
-                                getLogger().info("正在载入配置");
+                                Log.info("正在载入配置");
                                 if (LoadConfig()) {
-                                    getLogger().info("已成功载入配置");
+                                    Log.info("已成功载入配置");
                                     sender.sendMessage("已成功载入配置");
                                 } else {
-                                    getLogger().info("载入配置失败");
+                                    Log.info("载入配置失败");
                                     sender.sendMessage("载入配置失败");
                                 }
                             }
                             return true;
                         } catch (IOException e) {
                             sender.sendMessage("修改配置时发生异常，详细信息请查看服务器控制台!");
-                            getLogger().warning("修改配置时发生异常:");
+                            Log.warning("修改配置时发生异常:");
                             e.printStackTrace();
                             return true;
                         }
@@ -245,7 +248,7 @@ public class PluginMain extends JavaPlugin implements Listener {
                     if(args.length == 2){
                     //设置聊天前缀
                     if (args[0].equalsIgnoreCase("prefix")) {
-                        //getLogger().info("[调试] 进入修改聊天前缀");
+                        //Log.info("[调试] 进入修改聊天前缀");
                         try {
                             //选择清除还是更改
                             putConfig(
@@ -254,7 +257,7 @@ public class PluginMain extends JavaPlugin implements Listener {
                             );
                         } catch (IOException e) {
                             sender.sendMessage("修改配置时发生异常，详细信息请查看服务器控制台!");
-                            getLogger().warning("修改配置时发生异常:");
+                            Log.warning("修改配置时发生异常:");
                             e.printStackTrace();
                             return true;
                         }
@@ -263,7 +266,7 @@ public class PluginMain extends JavaPlugin implements Listener {
                     } else
                         //设置机器人名称
                         if (args[0].equalsIgnoreCase("robotname")) {
-                            //getLogger().info("[调试] 进入修改机器人名称");
+                            //Log.info("[调试] 进入修改机器人名称");
                             try {
                                 putConfig(
                                         "Robot.Name",
@@ -271,7 +274,7 @@ public class PluginMain extends JavaPlugin implements Listener {
                                 );
                             } catch (IOException e) {
                                 sender.sendMessage("修改配置时发生异常，详细信息请查看服务器控制台!");
-                                getLogger().warning("修改配置时发生异常:");
+                                Log.warning("修改配置时发生异常:");
                                 e.printStackTrace();
                                 return true;
                             }
@@ -280,7 +283,7 @@ public class PluginMain extends JavaPlugin implements Listener {
                     } else
                         //设置聊天前缀
                         if (args[0].equalsIgnoreCase("chattrigger")) {
-                            //getLogger().info("[调试] 进入修改聊天模式");
+                            //Log.info("[调试] 进入修改聊天模式");
                             if(args[1].equalsIgnoreCase("-check")){
                                 sender.sendMessage(
                                         cfg.getProperty("Dialogue.Chat_Trigger").equalsIgnoreCase("true") ?
@@ -295,7 +298,7 @@ public class PluginMain extends JavaPlugin implements Listener {
                                 );
                             } catch (IOException e) {
                                 sender.sendMessage("修改配置时发生异常，详细信息请查看服务器控制台!");
-                                getLogger().warning("修改配置时发生异常:");
+                                Log.warning("修改配置时发生异常:");
                                 e.printStackTrace();
                                 return true;
                             }
@@ -304,11 +307,11 @@ public class PluginMain extends JavaPlugin implements Listener {
                     }else
                         if(args[0].equalsIgnoreCase("test")){
                         if(args[1].equalsIgnoreCase("1")){
-                            getLogger().info("测试1 开始执行");
+                            Log.info("测试1 开始执行");
                             if(setupEconomy()){
-                                getLogger().info("Vault连接成功");
+                                Log.info("Vault连接成功");
                             }else{
-                                getLogger().warning("Vault连接失败");
+                                Log.warning("Vault连接失败");
                             }
                         }
 
@@ -323,7 +326,7 @@ public class PluginMain extends JavaPlugin implements Listener {
                                 putConfig("Robot.Switch",Switch ? "true":"false");
                             } catch (IOException e) {
                                 sender.sendMessage("修改配置时发生异常，详细信息请查看服务器控制台!");
-                                getLogger().warning("修改配置时发生异常:");
+                                Log.warning("修改配置时发生异常:");
                                 e.printStackTrace();
                                 return true;
                             }
@@ -332,18 +335,18 @@ public class PluginMain extends JavaPlugin implements Listener {
                         }else
                         //重载插件
                         if(args[0].equalsIgnoreCase("reload")){
-                            getLogger().info("正在载入配置");
+                            Log.info("正在载入配置");
                             try {
                                 //读取配置
                                 if (LoadConfig()) {
-                                    getLogger().info("已成功载入配置");
+                                    Log.info("已成功载入配置");
                                     sender.sendMessage("已成功载入配置");
                                 } else {
-                                    getLogger().info("载入配置失败");
+                                    Log.info("载入配置失败");
                                     sender.sendMessage("载入配置失败,尝试使用 setrobot reload 重载配置");
                                 }
                             } catch (IOException e) {
-                                getLogger().info("载入配置时发生异常：");
+                                Log.info("载入配置时发生异常：");
                                 sender.sendMessage("载入配置出错，详细信息请查看服务器控制台!");
                                 e.printStackTrace();
                             }
@@ -400,15 +403,15 @@ public class PluginMain extends JavaPlugin implements Listener {
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerCharEvent(AsyncPlayerChatEvent event) {
         //TODO:2017/09/15: 注意清理 [调试] 代码
-        //getLogger().info("[调试] " + "玩家聊天事件被触发");
+        //Log.info("[调试] " + "玩家聊天事件被触发");
         if(event.isCancelled()){
             //如果事件被取消，则放弃处理，防止浪费调用次数
-            //getLogger().info("[调试] " + "事件被取消，放弃处理");
+            //Log.info("[调试] " + "事件被取消，放弃处理");
             return;
         }
         //如果停用了聊天对话模式，则忽略事件
         if(!cfg.getProperty("Dialogue.Chat_Trigger","false").equalsIgnoreCase("true")){
-            //getLogger().info("[调试] " + "聊天对话模式被关闭，放弃处理");
+            //Log.info("[调试] " + "聊天对话模式被关闭，放弃处理");
             return;
         }
         //如果停用了机器人，则不处理事件
@@ -418,37 +421,37 @@ public class PluginMain extends JavaPlugin implements Listener {
         //前缀，如果需要
         //前缀如果不为空
         String prefix = cfg.getProperty("Dialogue.Trigger_Prefix","");
-        //getLogger().info("[调试] 触发前缀: " + prefix);
+        //Log.info("[调试] 触发前缀: " + prefix);
         if(!prefix.equalsIgnoreCase("")){
-            //getLogger().info("[调试] " + "前缀在信息的位置：" + event.getMessage().indexOf(prefix));
+            //Log.info("[调试] " + "前缀在信息的位置：" + event.getMessage().indexOf(prefix));
             //如果发现了前缀(在开头)
             if(event.getMessage().indexOf(prefix) != 0){
                 //不处理非指定前缀消息
-                //getLogger().info("[调试] " + "前缀不正确，放弃处理");
+                //Log.info("[调试] " + "前缀不正确，放弃处理");
                 return;
             }
         }
 
         //异步处理方法
         new Thread(() -> {
-            //getLogger().info("[调试] 处理线程已启动，开始异步处理...");
+            //Log.info("[调试] 处理线程已启动，开始异步处理...");
             //准备好一个JsonObject变量用来获取机器人返回值
             JsonObject rj;
             try {
                 //调用机器人
-                //getLogger().info("[调试] " + "调用机器人...");
+                //Log.info("[调试] " + "调用机器人...");
                 //清除前缀信息
                 rj = TLR.Robot(event.getMessage().replace(prefix,""), event.getPlayer().getName());
-                //getLogger().info("[调试] " + "调用完毕，开始处理");
+                //Log.info("[调试] " + "调用完毕，开始处理");
             } catch (IOException e) {
                 Bukkit.broadcastMessage("[错误]执行操作时发生了一个异常！详细信息请查看服务器控制台。");
-                getLogger().warning("调用机器人时发生了异常，信息如下:");
+                Log.warning("调用机器人时发生了异常，信息如下:");
                 e.printStackTrace();
                 return;
             }
 
             if(rj == null){
-                getLogger().warning("调用机器人失败！(调用返回不是合法Json)");
+                Log.warning("调用机器人失败！(调用返回不是合法Json)");
                 Bukkit.broadcastMessage("[错误]机器人调用失败！");
                 return;
             }
@@ -456,7 +459,7 @@ public class PluginMain extends JavaPlugin implements Listener {
             //前缀设置
             //测试发现有点别扭，所以加个空格- -
             String rs = cfg.getProperty("Robot.Name","").equalsIgnoreCase("") ? "" : cfg.getProperty("Robot.Name") + ": ";
-            //getLogger().info("[调试] " + "机器人回复前缀：" + rs);
+            //Log.info("[调试] " + "机器人回复前缀：" + rs);
 
             //根据code设置返回值
             int code = rj.get("code").getAsInt();
@@ -468,11 +471,11 @@ public class PluginMain extends JavaPlugin implements Listener {
                 rs = rs + "[插件]本功能暂不支持";
             } else if (code >= TulingRobot.TLCode.Error_KeyError) {
                 rs = rs + "[错误]" + TLR.getErrorString(code) + "(" + code + ")";
-                getLogger().warning("[错误]" + TLR.getErrorString(code) + "(" + code + ")");
+                Log.warning("[错误]" + TLR.getErrorString(code) + "(" + code + ")");
             }
 
-            //getLogger().info("[调试] " + "最终消息：" + rs);
-            //getLogger().info("[调试] " + "开始发送公屏信息");
+            //Log.info("[调试] " + "最终消息：" + rs);
+            //Log.info("[调试] " + "开始发送公屏信息");
             //发送公屏信息
             Bukkit.broadcastMessage(rs);
         }).start();
@@ -486,7 +489,7 @@ public class PluginMain extends JavaPlugin implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPluginDisable(PluginDisableEvent event){
         if(!setupEconomy()){
-            getLogger().warning("经济系统重载失败,请检查Vault是否启用！");
+            Log.warning("经济系统重载失败,请检查Vault是否启用！");
         }
     }
 
@@ -498,16 +501,16 @@ public class PluginMain extends JavaPlugin implements Listener {
      */
     private boolean LoadApiKey(){
         String Key = cfg.getProperty("Robot.ApiKey","");
-        //getLogger().info("[调试] ApiKey:" + Key);
+        //Log.info("[调试] ApiKey:" + Key);
         if(Key.equalsIgnoreCase("")){
-            getLogger().warning("ApiKey文件为空，请填入ApiKey！");
+            Log.warning("ApiKey文件为空，请填入ApiKey！");
         }else if(Key.length() != 32){
             //长度不对
-            getLogger().warning("不是一个标准的ApiKey！");
+            Log.warning("不是一个标准的ApiKey！");
             return false;
         }
         TLR.SetApiKey(Key);
-        getLogger().info("ApiKey已成功载入");
+        Log.info("ApiKey已成功载入");
         return true;
     }
 
@@ -523,18 +526,18 @@ public class PluginMain extends JavaPlugin implements Listener {
         if(!df.exists()){
             //是就删除，然后重新创建
             if(!df.mkdir()){
-                getLogger().warning("插件数据文件夹创建失败！请手动创建【TulingRobot】文件夹");
+                Log.warning("插件数据文件夹创建失败！请手动创建【TulingRobot】文件夹");
                 return false;
             }
         }else if(df.isFile()){
             if(df.delete()){
                 if(!df.mkdir()){
-                    getLogger().warning("插件数据文件夹创建失败！请手动创建【TulingRobot】文件夹");
+                    Log.warning("插件数据文件夹创建失败！请手动创建【TulingRobot】文件夹");
                     return false;
                 }
                 //这里成功后会跳转到
             }else{
-                getLogger().warning("数据文件夹异常，清理失败！");
+                Log.warning("数据文件夹异常，清理失败！");
                 return false;
             }
         }
@@ -550,7 +553,7 @@ public class PluginMain extends JavaPlugin implements Listener {
                 return true;
             }else{
                 //不是，返回
-                getLogger().warning("config.properties不是文件！");
+                Log.warning("config.properties不是文件！");
                 onConfigLoad(false);
                 return false;
             }
@@ -558,7 +561,7 @@ public class PluginMain extends JavaPlugin implements Listener {
             //没有文件，生成一个
             InputStream config = this.getClass().getResourceAsStream("/config.properties");
             if(config == null){
-                getLogger().warning("获取默认配置文件失败！请使用解压工具打开插件，解压【config.properties】文件到[plugins/TulingRobot]目录！");
+                Log.warning("获取默认配置文件失败！请使用解压工具打开插件，解压【config.properties】文件到[plugins/TulingRobot]目录！");
                 onConfigLoad(false);
                 return false;
             }
@@ -574,7 +577,7 @@ public class PluginMain extends JavaPlugin implements Listener {
             fos.close();
             //读入配置
             cfg.load(new InputStreamReader(new FileInputStream(configFile),"UTF-8"));
-            getLogger().warning("config.properties文件不存在，插件已自动创建，进行设置后使用【/setRobot reload】重载配置");
+            Log.warning("config.properties文件不存在，插件已自动创建，进行设置后使用【/setRobot reload】重载配置");
             init_config = true;
             onConfigLoad(false);
             return false;
@@ -595,7 +598,7 @@ public class PluginMain extends JavaPlugin implements Listener {
                 //经济系统载入失败
                 if (!setupEconomy()) {
                     //E1
-                    getLogger().warning("经济前置Vault载入失败！请检查Vault是否正常载入(收费系统将被关闭)");
+                    Log.warning("经济前置Vault载入失败！请检查Vault是否正常载入(收费系统将被关闭)");
                 } else {
                     //赋值
                     GetMoney = Double.parseDouble(cfg.getProperty("Econ.Price","0"));
@@ -612,12 +615,12 @@ public class PluginMain extends JavaPlugin implements Listener {
      */
     private boolean setupEconomy() {
         if (getServer().getPluginManager().getPlugin("Vault") == null) {
-            getLogger().warning("无法获取Vault插件对象");
+            Log.warning("无法获取Vault插件对象");
             return false;
         }
         RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class);
         if (rsp == null) {
-            getLogger().warning("获取类对象失败");
+            Log.warning("获取类对象失败");
             return false;
         }
         //获取经济操作对象
@@ -673,6 +676,6 @@ public class PluginMain extends JavaPlugin implements Listener {
 
         //新方法
         putConfig("Robot.ApiKey",ApiKey);
-        getLogger().info("机器人ApiKey已修改(New_Key: " + ApiKey + ")");
+        Log.info("机器人ApiKey已修改(New_Key: " + ApiKey + ")");
     }
 }
