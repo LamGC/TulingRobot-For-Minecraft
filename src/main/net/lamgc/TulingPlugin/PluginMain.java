@@ -401,7 +401,7 @@ public class PluginMain extends JavaPlugin implements Listener {
      * @param event 事件参数
      */
     @EventHandler(priority = EventPriority.LOWEST)
-    public void onPlayerCharEvent(AsyncPlayerChatEvent event) {
+    public void onPlayerChatEvent(AsyncPlayerChatEvent event) {
         //TODO:2017/09/15: 注意清理 [调试] 代码
         //Log.info("[调试] " + "玩家聊天事件被触发");
         if(event.isCancelled()){
